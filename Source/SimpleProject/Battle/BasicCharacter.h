@@ -41,6 +41,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UCameraComponent* Camera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TEnumAsByte<ETraceTypeQuery> TraceQuery;
+
 	// Input Actions
 	void MoveForward(float Value);
 	void MoveRight(float Value);

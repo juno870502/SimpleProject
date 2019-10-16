@@ -11,6 +11,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Battle/BasicArrowDamageType.h"
+#include "Engine/World.h"
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -31,6 +32,7 @@ ABasicCharacter::ABasicCharacter()
 	Camera->SetupAttachment(Spring);
 
 	GetMesh()->SetCollisionProfileName(TEXT("PlayerProf"));
+	GetMesh()->SetGenerateOverlapEvents(true);
 
 	bIsAttackAvailable = true;
 
@@ -105,10 +107,12 @@ void ABasicCharacter::Attack1()
 		FVector Start = Camera->GetComponentLocation();
 		FVector End = Camera->GetForwardVector() * 50000.f;
 		TArray<AActor*> ActorsToIgnore;
+		
 
-		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery::TraceTypeQuery1, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
+		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
 		{
 			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
+			UE_LOG(LogClass, Warning, TEXT("Trace : %s"), *Hit.BoneName.ToString());
 		}
 	}
 }

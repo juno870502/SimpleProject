@@ -7,9 +7,10 @@
 #include "BasicMonster.generated.h"
 
 UENUM(BlueprintType)
-enum class EMonsterType : uint8
+enum class EMonsterState : uint8
 {
 	LOCO	UMETA(DisplayName = "Locomotion"),
+	CHASE	UMETA(DisplayName = "Chase"),
 	ATTACK	UMETA(DisplayName = "Attack"),
 	HIT		UMETA(DisplayName = "HIT"),
 	DEATH	UMETA(DisplayName = "Death")
@@ -35,6 +36,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser) override;
 
+	// Monster Status
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
+	float MaxHP = 100.f;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
+	float CurrentHP;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
+	EMonsterState CurrentState;
 	
 };
