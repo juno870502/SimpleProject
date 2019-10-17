@@ -45,5 +45,6 @@ public:
 	float CurrentHP;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
 	EMonsterState CurrentState;
-	
+	UFUNCTION()
+	void SetCurrentState(EMonsterState NewState);
 };

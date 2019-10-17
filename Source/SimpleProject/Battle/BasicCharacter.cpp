@@ -11,7 +11,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Battle/BasicArrowDamageType.h"
-#include "Engine/World.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -35,6 +36,10 @@ ABasicCharacter::ABasicCharacter()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	bIsAttackAvailable = true;
+
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
+
+	StimuliSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
 
 	CurrentHP = MaxHP;
 }

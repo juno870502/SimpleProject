@@ -5,6 +5,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Battle/BasicMonster.h"
 
 ABasicAIController::ABasicAIController()
 {
@@ -12,8 +14,9 @@ ABasicAIController::ABasicAIController()
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
 	Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight"));
 	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
-	Sight->SightRadius = 500.f;
-	Sight->PeripheralVisionAngleDegrees = 60.f;
+	Sight->SightRadius = SightRadiusValue;
+	Sight->PeripheralVisionAngleDegrees = SightAngleValue;
+	Sight->DetectionByAffiliation.bDetectNeutrals = true;
 	AIPerception->ConfigureSense(*Sight);
 }
 
@@ -31,6 +34,24 @@ void ABasicAIController::BeginPlay()
 
 void ABasicAIController::SenseStuff(const TArray<AActor*>& UpdatedActors)
 {
+	float MinDistance = 9999.f;
+	ClosestTargetActor = nullptr;
+	for (auto i : UpdatedActors )
+	{
+		if (i->IsValidLowLevel())
+		{
+			float TempDistance = UKismetMathLibrary::Vector_Distance(GetPawn()->GetActorLocation(), i->GetActorLocation());
+			if (TempDistance < MinDistance)
+			{
+				MinDistance = TempDistance;
+				ClosestTargetActor = i;
+			}
+		}
+	}
+	if (ClosestTargetActor->IsValidLowLevel())
+	{
+		Cast<ABasicMonster>(GetPawn())->SetCurrentState(EMonsterState::CHASE);
+	}
 }
 
 void ABasicAIController::SetPawnState(EMonsterState NewState)

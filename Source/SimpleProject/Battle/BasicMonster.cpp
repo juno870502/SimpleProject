@@ -6,6 +6,7 @@
 #include "Battle/BasicAIController.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ABasicMonster::ABasicMonster()
@@ -62,4 +63,32 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 		break;
 	}
 	return 0.0f;
+}
+
+void ABasicMonster::SetCurrentState(EMonsterState NewState)
+{
+	if (CurrentState != EMonsterState::DEATH)
+	{
+		switch (NewState)
+		{
+		case EMonsterState::LOCO:
+			GetCharacterMovement()->MaxWalkSpeed = 200.f;
+			break;
+		case EMonsterState::CHASE:
+			GetCharacterMovement()->MaxWalkSpeed = 400.f;
+			break;
+		case EMonsterState::ATTACK:
+			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+			break;
+		case EMonsterState::HIT:
+			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+			break;
+		case EMonsterState::DEATH:
+			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+			break;
+		default:
+			break;
+		}
+		CurrentState = NewState;
+	}
 }

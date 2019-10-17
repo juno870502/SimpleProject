@@ -60,5 +60,9 @@ public:
 	float MaxHP = 100.f;
 	float CurrentHP;
 
+	// StimuliSource
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UAIPerceptionStimuliSourceComponent* StimuliSource;
+
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 };

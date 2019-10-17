@@ -35,8 +35,21 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAISenseConfig_Sight* Sight;
 
+	// Sense Sight Config Values
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
+	float SightRadiusValue = 500.f;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
+	float SightAngleValue = 60.f;
+
+	// GenericTeamID
+	//virtual void FGenericTeamId::;
+
+	// OnPerceptionUpdated Delegate
 	UFUNCTION()
 	void SenseStuff(const TArray<AActor*>& UpdatedActors);
 
 	void SetPawnState(EMonsterState NewState);
+	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	AActor* ClosestTargetActor;
 };
