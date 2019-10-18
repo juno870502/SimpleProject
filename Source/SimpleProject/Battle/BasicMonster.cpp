@@ -7,6 +7,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Battle/BasicArrowDamageType.h"
 
 // Sets default values
 ABasicMonster::ABasicMonster()
@@ -20,8 +22,6 @@ ABasicMonster::ABasicMonster()
 	//GetMesh()->SetCollisionProfileName(TEXT("MonsterProf"));
 	//GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MonsterProf"));
-
-	CurrentHP = MaxHP;
 }
 
 // Called when the game starts or when spawned
@@ -29,6 +29,8 @@ void ABasicMonster::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	CurrentHP = MaxHP;
+	SetCurrentState(EMonsterState::SPAWN);
 }
 
 // Called every frame
@@ -58,6 +60,11 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 	case FPointDamageEvent::ClassID:
 		CurrentHP -= Damage;
 		UE_LOG(LogClass, Warning, TEXT("Current HP : %f"), CurrentHP);
+		if (CurrentHP <= 0)
+		{
+			SetCurrentState(EMonsterState::DEATH);
+		}
+		SetCurrentState(EMonsterState::HIT);
 		break;
 	default:
 		break;
@@ -69,8 +76,12 @@ void ABasicMonster::SetCurrentState(EMonsterState NewState)
 {
 	if (CurrentState != EMonsterState::DEATH)
 	{
+		CurrentState = NewState;
 		switch (NewState)
 		{
+		case EMonsterState::SPAWN:
+			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+			break;
 		case EMonsterState::LOCO:
 			GetCharacterMovement()->MaxWalkSpeed = 200.f;
 			break;
@@ -89,6 +100,15 @@ void ABasicMonster::SetCurrentState(EMonsterState NewState)
 		default:
 			break;
 		}
-		CurrentState = NewState;
+	}
+}
+
+void ABasicMonster::MomentOfAttack()
+{
+	TArray<AActor*> Ignore;
+	FHitResult Hit;
+	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(), GetActorForwardVector()*5000.f, ETraceTypeQuery::TraceTypeQuery4, false, Ignore, EDrawDebugTrace::ForDuration, Hit, true))
+	{
+		UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
 	}
 }

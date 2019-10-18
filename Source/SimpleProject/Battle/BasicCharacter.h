@@ -54,6 +54,7 @@ public:
 	bool bIsAttackAvailable;
 
 	// Character State
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EBasicState CurrentState;
 
 	// Character HP

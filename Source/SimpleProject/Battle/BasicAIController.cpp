@@ -13,8 +13,8 @@ ABasicAIController::ABasicAIController()
 	BBComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BBComponent"));
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
 	Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight"));
-	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
 	Sight->SightRadius = SightRadiusValue;
+	Sight->LoseSightRadius = LoseSightRadiusValue;
 	Sight->PeripheralVisionAngleDegrees = SightAngleValue;
 	Sight->DetectionByAffiliation.bDetectNeutrals = true;
 	AIPerception->ConfigureSense(*Sight);
@@ -30,13 +30,17 @@ void ABasicAIController::BeginPlay()
 		RunBehaviorTree(BT);
 		GetBlackboardComponent()->SetValueAsVector(TEXT("HomeLocation"), GetPawn()->GetActorLocation());
 	}
+	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
 }
 
 void ABasicAIController::SenseStuff(const TArray<AActor*>& UpdatedActors)
 {
+	//UE_LOG(LogClass, Warning, TEXT("SizeOfActors : %d"), UpdatedActors.Num());
+	TArray<AActor*> PerceivedActors;
+	AIPerception->GetCurrentlyPerceivedActors(NULL, PerceivedActors);
 	float MinDistance = 9999.f;
 	ClosestTargetActor = nullptr;
-	for (auto i : UpdatedActors )
+	for (auto i : PerceivedActors)
 	{
 		if (i->IsValidLowLevel())
 		{
@@ -50,6 +54,7 @@ void ABasicAIController::SenseStuff(const TArray<AActor*>& UpdatedActors)
 	}
 	if (ClosestTargetActor->IsValidLowLevel())
 	{
+		GetBlackboardComponent()->SetValueAsObject(TEXT("TargetActor"), ClosestTargetActor);
 		Cast<ABasicMonster>(GetPawn())->SetCurrentState(EMonsterState::CHASE);
 	}
 }
@@ -59,6 +64,6 @@ void ABasicAIController::SetPawnState(EMonsterState NewState)
 	ABasicMonster* Monster = Cast<ABasicMonster>(GetPawn());
 	if (Monster)
 	{
-		Monster->CurrentState = NewState;
+		Monster->SetCurrentState(NewState);
 	}
 }

@@ -4,19 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
-#include "BTS_SetBBCurrentState.generated.h"
+#include "BTS_SelectTargetActor.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SIMPLEPROJECT_API UBTS_SetBBCurrentState : public UBTService_BlackboardBase
+class SIMPLEPROJECT_API UBTS_SelectTargetActor : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
 	
 public:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	FName CurrentStateKey;
 };

@@ -39,6 +39,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 	float SightRadiusValue = 500.f;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
+	float LoseSightRadiusValue = 600.f;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 	float SightAngleValue = 60.f;
 
 	// GenericTeamID

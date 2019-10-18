@@ -14,7 +14,7 @@ void UBTS_SetBBCurrentState::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 
 	ABasicMonster* Mon = Cast<ABasicMonster>(OwnerComp.GetAIOwner()->GetPawn());
 	if (Mon->IsValidLowLevel())
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsEnum(CurrentStateKey, (uint8)Mon->CurrentState);
+		OwnerComp.GetBlackboardComponent()->SetValueAsEnum(BlackboardKey.SelectedKeyName, (uint8)Mon->CurrentState);
 	}
 	
 }

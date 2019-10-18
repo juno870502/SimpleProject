@@ -9,6 +9,7 @@
 UENUM(BlueprintType)
 enum class EMonsterState : uint8
 {
+	SPAWN	UMETA(DisplayName = "Spawn"),
 	LOCO	UMETA(DisplayName = "Locomotion"),
 	CHASE	UMETA(DisplayName = "Chase"),
 	ATTACK	UMETA(DisplayName = "Attack"),
@@ -44,7 +45,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
 	float CurrentHP;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
+	float AttackRange = 300.f;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 	EMonsterState CurrentState;
 	UFUNCTION()
 	void SetCurrentState(EMonsterState NewState);
+
+	// AttackMoment
+	void MomentOfAttack();
 };
