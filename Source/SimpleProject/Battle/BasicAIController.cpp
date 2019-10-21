@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Hearing.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Battle/BasicMonster.h"
 
@@ -17,7 +18,10 @@ ABasicAIController::ABasicAIController()
 	Sight->LoseSightRadius = LoseSightRadiusValue;
 	Sight->PeripheralVisionAngleDegrees = SightAngleValue;
 	Sight->DetectionByAffiliation.bDetectNeutrals = true;
+	Hearing = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("Hearing"));
+	Hearing->HearingRange = HearingRange;
 	AIPerception->ConfigureSense(*Sight);
+	AIPerception->ConfigureSense(*Hearing);
 }
 
 void ABasicAIController::BeginPlay()

@@ -35,6 +35,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAISenseConfig_Sight* Sight;
 
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	class UAISenseConfig_Hearing* Hearing;
+
 	// Sense Sight Config Values
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 	float SightRadiusValue = 500.f;
@@ -42,6 +45,9 @@ public:
 	float LoseSightRadiusValue = 600.f;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 	float SightAngleValue = 60.f;
+	// Sense Hearing Config Values
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
+	float HearingRange = 300.f;
 
 	// GenericTeamID
 	//virtual void FGenericTeamId::;

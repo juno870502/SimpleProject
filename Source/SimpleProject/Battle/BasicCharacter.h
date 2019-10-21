@@ -49,7 +49,7 @@ public:
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
-	//void Jump();
+	void PressJump();
 	void Attack1();
 	bool bIsAttackAvailable;
 

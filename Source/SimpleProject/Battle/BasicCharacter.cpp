@@ -13,6 +13,7 @@
 #include "Battle/BasicArrowDamageType.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -39,7 +40,11 @@ ABasicCharacter::ABasicCharacter()
 
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 
-	StimuliSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
+	TSubclassOf<UAISense> SenseSources;
+	
+	StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+	StimuliSource->RegisterForSense(UAISense_Hearing::StaticClass());
+	
 
 	CurrentHP = MaxHP;
 }
@@ -68,6 +73,7 @@ void ABasicCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ABasicCharacter::LookUp);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ABasicCharacter::Turn);
 
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ABasicCharacter::PressJump);
 	PlayerInputComponent->BindAction(TEXT("Attack1"), EInputEvent::IE_Pressed, this, &ABasicCharacter::Attack1);
 }
 
@@ -101,6 +107,12 @@ void ABasicCharacter::LookUp(float Value)
 	{
 		AddControllerPitchInput(Value);
 	}
+}
+
+void ABasicCharacter::PressJump()
+{
+	Super::Jump();
+	UE_LOG(LogClass, Warning, TEXT("InJump"));
 }
 
 void ABasicCharacter::Attack1()

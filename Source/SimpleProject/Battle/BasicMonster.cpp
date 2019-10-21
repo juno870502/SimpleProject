@@ -22,6 +22,11 @@ ABasicMonster::ABasicMonster()
 	//GetMesh()->SetCollisionProfileName(TEXT("MonsterProf"));
 	//GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MonsterProf"));
+
+	// Monster Rotation Setup
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 }
 
 // Called when the game starts or when spawned

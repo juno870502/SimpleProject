@@ -15,6 +15,6 @@ class SIMPLEPROJECT_API UBTT_ChoiceRandomLocation : public UBTTaskNode
 	GENERATED_BODY()
 	
 public:
-	int a;
+	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };
