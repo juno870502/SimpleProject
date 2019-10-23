@@ -25,19 +25,20 @@ public:
 	class UBlackboardData* BB;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	class UBehaviorTree* BT;
-
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	class UBlackboardComponent* BBComponent;
-
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAIPerceptionComponent* AIPerception;
-
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAISenseConfig_Sight* Sight;
-
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAISenseConfig_Hearing* Hearing;
 
+	// Initialize AI (Change BlackBoard Key Values)
+	void InitializeAI();
+
+	// Set Home Location
+	void SetHomeLocation(FVector NewLocation);
 
 	// Sense Sight Config Values
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
@@ -60,8 +61,12 @@ public:
 	UFUNCTION()
 	void SenseStuff(const TArray<AActor*>& UpdatedActors);
 
+	// Set Pawn State
 	void SetPawnState(EMonsterState NewState);
 	
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	AActor* ClosestTargetActor;
+
+	// In Death, Respawn Function
+	void Respawn();
 };

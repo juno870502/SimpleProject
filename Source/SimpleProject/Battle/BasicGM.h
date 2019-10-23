@@ -13,5 +13,8 @@ UCLASS()
 class SIMPLEPROJECT_API ABasicGM : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	ABasicGM();
+	virtual void BeginPlay() override;
 };

@@ -32,4 +32,8 @@ void UBTS_SelectTargetActor::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 
 			Mon->SetCurrentState(EMonsterState::LOCO);
 		}
 	}
+	else
+	{
+		Mon->SetCurrentState(EMonsterState::LOCO);
+	}
 }

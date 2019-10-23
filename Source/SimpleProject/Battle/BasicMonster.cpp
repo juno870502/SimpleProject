@@ -42,7 +42,6 @@ void ABasicMonster::BeginPlay()
 void ABasicMonster::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -106,6 +105,13 @@ void ABasicMonster::SetCurrentState(EMonsterState NewState)
 			break;
 		}
 	}
+	else
+	{
+		if (NewState == EMonsterState::SPAWN)
+		{
+			CurrentState = NewState;
+		}
+	}
 }
 
 void ABasicMonster::MomentOfAttack()
@@ -117,3 +123,10 @@ void ABasicMonster::MomentOfAttack()
 		UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
 	}
 }
+
+void ABasicMonster::InitializeValues()
+{
+	CurrentHP = MaxHP;
+	SetCurrentState(EMonsterState::SPAWN);
+}
+

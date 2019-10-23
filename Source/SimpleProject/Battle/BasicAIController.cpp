@@ -10,6 +10,7 @@
 #include "Battle/BasicMonster.h"
 #include "Battle/BasicPlayerController.h"
 #include "Battle/BasicCharacter.h"
+#include "NavigationSystem.h"
 
 ABasicAIController::ABasicAIController()
 {
@@ -39,13 +40,30 @@ void ABasicAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitializeAI();
+
+	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
+}
+
+void ABasicAIController::InitializeAI()
+{
+	BBComponent->ClearValue(TEXT("HomeLocation"));
+	BBComponent->ClearValue(TEXT("TargetActor"));
+	SetHomeLocation(GetPawn()->GetActorLocation());
+	if (ClosestTargetActor->IsValidLowLevel())
+	{
+		ClosestTargetActor = NULL;
+	}
+}
+
+void ABasicAIController::SetHomeLocation(FVector NewLocation)
+{
 	if (BB && BBComponent && BT)
 	{
 		UseBlackboard(BB, BBComponent);
 		RunBehaviorTree(BT);
-		GetBlackboardComponent()->SetValueAsVector(TEXT("HomeLocation"), GetPawn()->GetActorLocation());
+		GetBlackboardComponent()->SetValueAsVector(TEXT("HomeLocation"), NewLocation);
 	}
-	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
 }
 
 ETeamAttitude::Type ABasicAIController::GetTeamAttitudeTowards(const AActor & Other) const
@@ -93,7 +111,7 @@ void ABasicAIController::SenseStuff(const TArray<AActor*>& UpdatedActors)
 	}
 	if (ClosestTargetActor->IsValidLowLevel())
 	{
-		GetBlackboardComponent()->SetValueAsObject(TEXT("TargetActor"), ClosestTargetActor);
+		BBComponent->SetValueAsObject(TEXT("TargetActor"), ClosestTargetActor);
 		Cast<ABasicMonster>(GetPawn())->SetCurrentState(EMonsterState::CHASE);
 	}
 }
@@ -105,5 +123,22 @@ void ABasicAIController::SetPawnState(EMonsterState NewState)
 	{
 		Monster->SetCurrentState(NewState);
 	}
+}
+
+void ABasicAIController::Respawn()
+{
+	// Set Random Respawn Location
+	FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), GetPawn()->GetActorLocation(), 3000.f);
+	GetPawn()->SetActorLocation(TargetVec);
+	
+	// Monster Initialize
+	ABasicMonster* Mon = Cast<ABasicMonster>(GetPawn());
+	if (Mon->IsValidLowLevel())
+	{
+		Mon->InitializeValues();
+	}
+
+	// AI Initialize
+	InitializeAI();
 }
 

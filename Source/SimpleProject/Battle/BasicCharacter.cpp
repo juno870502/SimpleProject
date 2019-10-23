@@ -128,7 +128,7 @@ void ABasicCharacter::Attack1()
 
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
 		{
-			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
+			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
 			UE_LOG(LogClass, Warning, TEXT("Trace : %s"), *Hit.BoneName.ToString());
 		}
 	}
