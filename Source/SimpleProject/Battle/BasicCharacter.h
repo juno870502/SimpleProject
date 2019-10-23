@@ -65,5 +65,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UAIPerceptionStimuliSourceComponent* StimuliSource;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UPawnNoiseEmitterComponent* PawnNoise;
+
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 };

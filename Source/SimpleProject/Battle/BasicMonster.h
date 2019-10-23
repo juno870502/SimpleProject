@@ -46,6 +46,8 @@ public:
 	float CurrentHP;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
 	float AttackRange = 300.f;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
+	float ChaseRange = 3000.f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 	EMonsterState CurrentState;
 	UFUNCTION()

@@ -14,7 +14,7 @@ EBTNodeResult::Type UBTT_ChoiceRandomLocation::ExecuteTask(UBehaviorTreeComponen
 
 	if (AIC)
 	{
-		FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), AIC->GetPawn()->GetActorLocation(), 500.f);
+		FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation")), 500.f);
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(TEXT("TargetLocation"), TargetVec);
 		return EBTNodeResult::Succeeded;
 	}

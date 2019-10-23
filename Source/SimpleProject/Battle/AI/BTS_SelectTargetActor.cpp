@@ -16,7 +16,7 @@ void UBTS_SelectTargetActor::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 
 
 	if (TargetActor->IsValidLowLevel() && Mon->IsValidLowLevel())
 	{
-		UE_LOG(LogClass, Warning, TEXT("%f"), UKismetMathLibrary::Vector_Distance(Mon->GetActorLocation(), TargetActor->GetActorLocation()));
+		// In Attack Range -> State::Attack / Out Attack Range -> State::Chase
 		if (Mon->AttackRange >= UKismetMathLibrary::Vector_Distance(Mon->GetActorLocation(), TargetActor->GetActorLocation()))
 		{
 			Mon->SetCurrentState(EMonsterState::ATTACK);
@@ -24,6 +24,12 @@ void UBTS_SelectTargetActor::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 
 		else
 		{
 			Mon->SetCurrentState(EMonsterState::CHASE);
+		}
+
+		// Out Limit Radius -> State::Loco
+		if (Mon->ChaseRange < UKismetMathLibrary::Vector_Distance(Mon->GetActorLocation(), OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation"))))
+		{
+			Mon->SetCurrentState(EMonsterState::LOCO);
 		}
 	}
 }

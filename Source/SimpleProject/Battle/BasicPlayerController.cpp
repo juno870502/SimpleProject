@@ -5,4 +5,10 @@
 
 ABasicPlayerController::ABasicPlayerController()
 {
+	SetGenericTeamId(10);
+}
+
+FGenericTeamId ABasicPlayerController::GetGenericTeamId() const
+{
+	return TeamID;
 }

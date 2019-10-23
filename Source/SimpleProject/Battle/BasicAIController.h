@@ -38,6 +38,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAISenseConfig_Hearing* Hearing;
 
+
 	// Sense Sight Config Values
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 	float SightRadiusValue = 500.f;
@@ -49,8 +50,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 	float HearingRange = 300.f;
 
-	// GenericTeamID
-	//virtual void FGenericTeamId::;
+	// GenericTeamID & Judge TeamAttitude
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
+	FGenericTeamId TeamID = 5;
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	// OnPerceptionUpdated Delegate
 	UFUNCTION()

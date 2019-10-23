@@ -25,7 +25,7 @@ ABasicMonster::ABasicMonster()
 
 	// Monster Rotation Setup
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 }
 

@@ -14,6 +14,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
+#include "Components/PawnNoiseEmitterComponent.h"
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -38,14 +39,12 @@ ABasicCharacter::ABasicCharacter()
 
 	bIsAttackAvailable = true;
 
+	// AI StimuliSource Config
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
-
-	TSubclassOf<UAISense> SenseSources;
-	
+	PawnNoise = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("PawnNoise"));
 	StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
 	StimuliSource->RegisterForSense(UAISense_Hearing::StaticClass());
 	
-
 	CurrentHP = MaxHP;
 }
 
@@ -112,6 +111,7 @@ void ABasicCharacter::LookUp(float Value)
 void ABasicCharacter::PressJump()
 {
 	Super::Jump();
+	UAISense_Hearing::ReportNoiseEvent(this->GetWorld(), GetActorLocation(), 1.f, this, 0.f, NAME_None);
 	UE_LOG(LogClass, Warning, TEXT("InJump"));
 }
 
