@@ -33,6 +33,8 @@ public:
 	class UAISenseConfig_Sight* Sight;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAISenseConfig_Hearing* Hearing;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	class UAISenseConfig_Damage* Damaging;
 
 	// Initialize AI (Change BlackBoard Key Values)
 	void InitializeAI();

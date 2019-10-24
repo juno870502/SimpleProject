@@ -44,6 +44,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TEnumAsByte<ETraceTypeQuery> TraceQuery;
 
+	// Character Status
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float MaxHP = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float CurrentHP;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float IdleMaxWalkSpeed = 600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float OtherMaxWalkSpeed = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	FRotator IdleRotationRate = FRotator(360.f, 0.f, 0.f);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	FRotator OtherRotationRate = FRotator(0.f, 0.f, 0.f);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	EBasicState CurrentState;
+
+	// StimuliSource
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UAIPerceptionStimuliSourceComponent* StimuliSource;
+
+
+public:
+
 	// Input Actions
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -53,20 +76,8 @@ public:
 	void Attack1();
 	bool bIsAttackAvailable;
 
-	// Character State
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EBasicState CurrentState;
-
-	// Character HP
-	float MaxHP = 100.f;
-	float CurrentHP;
-
-	// StimuliSource
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class UAIPerceptionStimuliSourceComponent* StimuliSource;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class UPawnNoiseEmitterComponent* PawnNoise;
-
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	// Change State
+	void SetCurrentState(EBasicState NewState);
 };

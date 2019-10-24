@@ -14,7 +14,6 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
-#include "Components/PawnNoiseEmitterComponent.h"
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -40,10 +39,9 @@ ABasicCharacter::ABasicCharacter()
 	bIsAttackAvailable = true;
 
 	// AI StimuliSource Config
-	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
-	PawnNoise = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("PawnNoise"));
-	StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
-	StimuliSource->RegisterForSense(UAISense_Hearing::StaticClass());
+	//StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
+	//StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+	//StimuliSource->RegisterForSense(UAISense_Hearing::StaticClass());
 	
 	CurrentHP = MaxHP;
 }
@@ -125,7 +123,6 @@ void ABasicCharacter::Attack1()
 		FVector End = Camera->GetForwardVector() * 50000.f;
 		TArray<AActor*> ActorsToIgnore;
 		
-
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
 		{
 			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
@@ -154,3 +151,35 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	return 0.0f;
 }
 
+void ABasicCharacter::SetCurrentState(EBasicState NewState)
+{
+	if (CurrentState != EBasicState::DEATH)
+	{
+		switch (NewState)
+		{
+			CurrentState = NewState;
+		case EBasicState::LOCO:
+			GetCharacterMovement()->MaxWalkSpeed = IdleMaxWalkSpeed;
+			GetCharacterMovement()->RotationRate = IdleRotationRate;
+			break;
+		case EBasicState::ATTACK:
+			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
+			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			break;
+		case EBasicState::HIT:
+			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
+			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			break;
+		case EBasicState::DEATH:
+			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
+			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+
+	}
+}

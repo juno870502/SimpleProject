@@ -35,7 +35,7 @@ void ABasicMonster::BeginPlay()
 	Super::BeginPlay();
 	
 	CurrentHP = MaxHP;
-	SetCurrentState(EMonsterState::SPAWN);
+	SetCurrentState(EMonsterState::LOCO);
 }
 
 // Called every frame
@@ -73,7 +73,7 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 	default:
 		break;
 	}
-	return 0.0f;
+	return Damage;
 }
 
 void ABasicMonster::SetCurrentState(EMonsterState NewState)

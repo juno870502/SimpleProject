@@ -6,6 +6,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
+#include "Perception/AISenseConfig_Damage.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Battle/BasicMonster.h"
 #include "Battle/BasicPlayerController.h"
@@ -31,6 +32,10 @@ ABasicAIController::ABasicAIController()
 	Hearing->HearingRange = HearingRange;
 	Hearing->DetectionByAffiliation.bDetectNeutrals = true;
 	GetPerceptionComponent()->ConfigureSense(*Hearing);
+
+	// AISense Damage Config
+	Damaging = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage"));
+	GetPerceptionComponent()->ConfigureSense(*Damaging);
 	
 	// SetTeam ID
 	SetGenericTeamId(TeamID);
@@ -40,7 +45,7 @@ void ABasicAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitializeAI();
+	SetHomeLocation(GetPawn()->GetActorLocation());
 
 	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
 }
@@ -127,8 +132,9 @@ void ABasicAIController::SetPawnState(EMonsterState NewState)
 
 void ABasicAIController::Respawn()
 {
-	// Set Random Respawn Location
-	FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), GetPawn()->GetActorLocation(), 3000.f);
+	// Set Random Respawn Location from Home Vecotr
+	FVector OriginVec = BBComponent->GetValueAsVector(TEXT("HomeLocation"));
+	FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), OriginVec, 3000.f);
 	GetPawn()->SetActorLocation(TargetVec);
 	
 	// Monster Initialize
