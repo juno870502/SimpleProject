@@ -9,10 +9,12 @@
 UENUM(BlueprintType)
 enum class EBasicState : uint8
 {
-	LOCO	UMETA(DisplayName = "Locomotion"),
-	ATTACK	UMETA(DisplayName = "Attack"),
-	HIT		UMETA(DisplayName = "HIT"),
-	DEATH	UMETA(DisplayName = "Death")
+	LOCO			UMETA(DisplayName = "Locomotion"),
+	PrimaryShot		UMETA(DisplayName = "PrimaryShot"),
+	RAbilityShot	UMETA(DisplayName = "RAbilityShot"),
+	QAbilityShot	UMETA(DisplayName = "QAbilityShot"),
+	HIT				UMETA(DisplayName = "HIT"),
+	DEATH			UMETA(DisplayName = "Death")
 };
 
 UCLASS()
@@ -73,7 +75,11 @@ public:
 	void Turn(float Value);
 	void LookUp(float Value);
 	void PressJump();
+
+	// Attack Function
 	void Attack1();
+	void ShotArrow();
+	void EndOfAttack();
 	bool bIsAttackAvailable;
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

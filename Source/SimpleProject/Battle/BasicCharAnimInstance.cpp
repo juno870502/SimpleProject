@@ -3,6 +3,7 @@
 
 #include "BasicCharAnimInstance.h"
 #include "Battle/BasicCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 void UBasicCharAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -13,5 +14,7 @@ void UBasicCharAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		ABPVelocity = Char->GetVelocity().Size();
 		ABPCurrentState = Char->CurrentState;
+		ABPAngle = CalculateDirection(Char->GetCharacterMovement()->Velocity,
+			Char->GetActorRotation());
 	}
 }

@@ -14,6 +14,8 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
+#include "Battle/BasicArrow.h"
+#include "Engine/World.h"
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -131,6 +133,11 @@ void ABasicCharacter::Attack1()
 	}
 }
 
+void ABasicCharacter::ShotArrow()
+{
+	GetWorld()->SpawnActor(ABasicArrow::StaticClass(),NAME_None, GetMesh()->GetSocketTransform(TEXT("arrow_anchor")));
+}
+
 float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
@@ -157,12 +164,19 @@ void ABasicCharacter::SetCurrentState(EBasicState NewState)
 	{
 		switch (NewState)
 		{
-			CurrentState = NewState;
 		case EBasicState::LOCO:
 			GetCharacterMovement()->MaxWalkSpeed = IdleMaxWalkSpeed;
 			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
-		case EBasicState::ATTACK:
+		case EBasicState::PrimaryShot:
+			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
+			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			break;
+		case EBasicState::RAbilityShot:
+			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
+			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			break;
+		case EBasicState::QAbilityShot:
 			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
 			GetCharacterMovement()->RotationRate = OtherRotationRate;
 			break;

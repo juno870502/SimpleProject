@@ -23,5 +23,8 @@ public:
 	float ABPVelocity;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CharacterStatus")
+	float ABPAngle;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CharacterStatus")
 	EBasicState ABPCurrentState;
 };
