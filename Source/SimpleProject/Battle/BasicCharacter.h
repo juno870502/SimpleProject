@@ -43,6 +43,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UCameraComponent* Camera;
 
+	// TraceSetting in BP
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TEnumAsByte<ETraceTypeQuery> TraceQuery;
 
@@ -54,9 +55,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	float IdleMaxWalkSpeed = 600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float AttackMaxWalkSpeed = 300.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	float OtherMaxWalkSpeed = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	FRotator IdleRotationRate = FRotator(360.f, 0.f, 0.f);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	FRotator AttackRotationRate = FRotator(120.f, 0.f, 0.f);
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	FRotator OtherRotationRate = FRotator(0.f, 0.f, 0.f);
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
@@ -77,13 +82,21 @@ public:
 	void PressJump();
 
 	// Attack Function
-	void Attack1();
-	void ShotArrow();
-	void EndOfAttack();
+	void PrimaryShot();
+	void RAbilityShot();
+	void QAbilityShot();
+	void ShotArrow(FVector& TargetLocation);
 	bool bIsAttackAvailable;
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	// Change State
 	void SetCurrentState(EBasicState NewState);
+
+	// Arrow Setting in BP
+	UPROPERTY(EditAnywhere, Category = "Arrow")
+	TSubclassOf<class ABasicArrow> Arrow_Template;
+
+	//UPROPERTY(EditAnywhere, Category = "Rocket")
+		//TSubclassOf<class AMyRocket> Rocket_Template;
 };

@@ -35,6 +35,7 @@ ABasicCharacter::ABasicCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(Spring);
 
+	// Collision Setting
 	GetMesh()->SetCollisionProfileName(TEXT("PlayerProf"));
 	GetMesh()->SetGenerateOverlapEvents(true);
 
@@ -73,7 +74,9 @@ void ABasicCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ABasicCharacter::Turn);
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ABasicCharacter::PressJump);
-	PlayerInputComponent->BindAction(TEXT("Attack1"), EInputEvent::IE_Pressed, this, &ABasicCharacter::Attack1);
+	PlayerInputComponent->BindAction(TEXT("Attack1"), EInputEvent::IE_Pressed, this, &ABasicCharacter::PrimaryShot);
+	PlayerInputComponent->BindAction(TEXT("Attack2"), EInputEvent::IE_Pressed, this, &ABasicCharacter::RAbilityShot);
+
 }
 
 void ABasicCharacter::MoveForward(float Value)
@@ -115,7 +118,7 @@ void ABasicCharacter::PressJump()
 	UE_LOG(LogClass, Warning, TEXT("InJump"));
 }
 
-void ABasicCharacter::Attack1()
+void ABasicCharacter::PrimaryShot()
 {
 	if (bIsAttackAvailable)
 	{
@@ -124,18 +127,50 @@ void ABasicCharacter::Attack1()
 		FVector Start = Camera->GetComponentLocation();
 		FVector End = Camera->GetForwardVector() * 50000.f;
 		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(this);
 		
+		//SetCurrentState(EBasicState::PrimaryShot);
+		
+
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
 		{
+			ShotArrow(Hit.Location);
 			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
 			UE_LOG(LogClass, Warning, TEXT("Trace : %s"), *Hit.BoneName.ToString());
+		}
+		else
+		{
+			ShotArrow(End);
 		}
 	}
 }
 
-void ABasicCharacter::ShotArrow()
+void ABasicCharacter::RAbilityShot()
 {
-	GetWorld()->SpawnActor(ABasicArrow::StaticClass(),NAME_None, GetMesh()->GetSocketTransform(TEXT("arrow_anchor")));
+}
+
+void ABasicCharacter::QAbilityShot()
+{
+}
+
+void ABasicCharacter::ShotArrow(FVector& TargetLocation)
+{
+	//GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketTransform(TEXT("arrow_anchor")));
+	FRotator LookRotator = UKismetMathLibrary::FindLookAtRotation(GetMesh()->GetSocketLocation(TEXT("arrow_anchor")), TargetLocation);
+	GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator);
+	switch (CurrentState)
+	{
+	case EBasicState::PrimaryShot:
+		GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, Camera->GetComponentLocation(), Camera->GetComponentRotation());
+		UE_LOG(LogClass, Warning, TEXT("InSpawnArrow"));
+		break;
+	case EBasicState::RAbilityShot:
+		break;
+	case EBasicState::QAbilityShot:
+		break;
+	default:
+		break;
+	}
 }
 
 float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -169,24 +204,24 @@ void ABasicCharacter::SetCurrentState(EBasicState NewState)
 			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		case EBasicState::PrimaryShot:
-			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
-			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			GetCharacterMovement()->MaxWalkSpeed = AttackMaxWalkSpeed;
+			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		case EBasicState::RAbilityShot:
 			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
-			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			GetCharacterMovement()->RotationRate = AttackRotationRate;
 			break;
 		case EBasicState::QAbilityShot:
 			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
-			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			GetCharacterMovement()->RotationRate = AttackRotationRate;
 			break;
 		case EBasicState::HIT:
 			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
-			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		case EBasicState::DEATH:
 			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
-			GetCharacterMovement()->RotationRate = OtherRotationRate;
+			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		default:
 			break;
