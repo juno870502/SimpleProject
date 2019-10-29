@@ -59,9 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	float OtherMaxWalkSpeed = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
-	FRotator IdleRotationRate = FRotator(360.f, 0.f, 0.f);
+	FRotator IdleRotationRate = FRotator(0.f, 180.f, 0.f);
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
-	FRotator AttackRotationRate = FRotator(120.f, 0.f, 0.f);
+	FRotator AttackRotationRate = FRotator(0.f, 120.f, 0.f);
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	FRotator OtherRotationRate = FRotator(0.f, 0.f, 0.f);
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
@@ -74,6 +74,12 @@ public:
 
 public:
 
+	// I don't know how to get control rotation in multiplay game
+	// so create new variable to get control rotation
+	// Is this work?
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FRotator ControlRotation;
+
 	// Input Actions
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -85,8 +91,13 @@ public:
 	void PrimaryShot();
 	void RAbilityShot();
 	void QAbilityShot();
-	void ShotArrow(FVector& TargetLocation);
+	void MainAttackFunc(EBasicState AttackState);
 	bool bIsAttackAvailable;
+
+	// Spawn in Server
+	UFUNCTION(Server, Reliable)
+	void C2S_ShotArrow(const FVector& TargetLocation);
+	void C2S_ShotArrow_Implementation(const FVector& TargetLocation);
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
@@ -96,7 +107,7 @@ public:
 	// Arrow Setting in BP
 	UPROPERTY(EditAnywhere, Category = "Arrow")
 	TSubclassOf<class ABasicArrow> Arrow_Template;
-
-	//UPROPERTY(EditAnywhere, Category = "Rocket")
-		//TSubclassOf<class AMyRocket> Rocket_Template;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Anim")
+	class UAnimMontage* AttackMontage;
 };

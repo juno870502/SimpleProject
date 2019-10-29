@@ -22,4 +22,9 @@ public:
 	FGenericTeamId TeamID = 10;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TSubclassOf<UUserWidget> MainWidgetClass;
+
+	virtual void BeginPlay() override;
 };

@@ -2,6 +2,7 @@
 
 
 #include "BasicPlayerController.h"
+#include "UserWidget.h"
 
 ABasicPlayerController::ABasicPlayerController()
 {
@@ -11,4 +12,18 @@ ABasicPlayerController::ABasicPlayerController()
 FGenericTeamId ABasicPlayerController::GetGenericTeamId() const
 {
 	return TeamID;
+}
+
+void ABasicPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (IsLocalPlayerController())
+	{
+		UUserWidget* MainWidget = CreateWidget<UUserWidget>(this, MainWidgetClass);
+		if (MainWidget)
+		{
+			MainWidget->AddToViewport();
+		}
+	}
 }

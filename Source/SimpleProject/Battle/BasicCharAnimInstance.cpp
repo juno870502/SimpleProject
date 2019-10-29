@@ -4,6 +4,8 @@
 #include "BasicCharAnimInstance.h"
 #include "Battle/BasicCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "BasicPlayerController.h"
 
 void UBasicCharAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -12,9 +14,17 @@ void UBasicCharAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	ABasicCharacter* Char = Cast<ABasicCharacter>(TryGetPawnOwner());
 	if (Char && Char->IsValidLowLevel())
 	{
-		ABPVelocity = Char->GetVelocity().Size();
+		ABPVelocity = Char->GetCharacterMovement()->Velocity.Size2D();
 		ABPCurrentState = Char->CurrentState;
-		ABPAngle = CalculateDirection(Char->GetCharacterMovement()->Velocity,
-			Char->GetActorRotation());
+		ABPAngle = CalculateDirection(Char->GetCharacterMovement()->Velocity, Char->GetActorRotation());
+		AimOffsetPitch = Char->GetBaseAimRotation().Pitch;
+		
+
+		FRotator TargetRotator = UKismetMathLibrary::NormalizedDeltaRotator(Char->GetControlRotation(), Char->GetActorRotation());	
+		AimOffsetPitch = UKismetMathLibrary::Clamp(TargetRotator.Pitch, -90, 90);
+		AimOffsetYaw = UKismetMathLibrary::Clamp(TargetRotator.Yaw, -90, 90);
+
+		ControlRotationYaw = Char->GetControlRotation().Yaw;
+
 	}
 }

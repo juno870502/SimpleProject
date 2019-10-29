@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ABasicArrow::ABasicArrow()
@@ -30,9 +31,16 @@ ABasicArrow::ABasicArrow()
 
 	// Set projectile movement setting
 	Projectile->bRotationFollowsVelocity = true;
-	Projectile->ProjectileGravityScale = .1f;
+	Projectile->ProjectileGravityScale = 0.f;
 	Projectile->Velocity = FVector(1.0f, 0.f, 0.f);
 	Projectile->InitialSpeed = CustomInitSpeed;
+
+	// Set Particle setting
+	Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
+	Particle->SetupAttachment(StaticMesh, TEXT("ParticleSocket"));
+	Particle->SetRelativeScale3D(FVector(.5f, .5f, .5f));
+	Particle->SetColorParameter(TEXT("color"), ParticleColor);
+	
 }
 
 // Called when the game starts or when spawned
@@ -56,5 +64,5 @@ void ABasicArrow::Tick(float DeltaTime)
 
 void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	//UE_LOG(LogClass, Warning, TEXT("%s"), *OtherActor->GetFName());
+	UE_LOG(LogClass, Warning, TEXT("%s"), *OtherActor->GetName());
 }

@@ -16,6 +16,7 @@
 #include "Perception/AISense_Hearing.h"
 #include "Battle/BasicArrow.h"
 #include "Engine/World.h"
+#include "Animation/AnimMontage.h"
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -28,7 +29,7 @@ ABasicCharacter::ABasicCharacter()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
 	Spring = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring"));
-	Spring->SetRelativeLocationAndRotation(FVector(0.f, 50.f, 50.f), FRotator(-30.f, 0.f, 0.f));
+	Spring->SetRelativeLocationAndRotation(FVector(0.f, 50.f, 70.f), FRotator(-30.f, 0.f, 0.f));
 	Spring->SetupAttachment(RootComponent);
 	Spring->bUsePawnControlRotation = true;
 
@@ -45,7 +46,11 @@ ABasicCharacter::ABasicCharacter()
 	//StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 	//StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
 	//StimuliSource->RegisterForSense(UAISense_Hearing::StaticClass());
+
+	AttackMontage = CreateDefaultSubobject<UAnimMontage>(TEXT("AttackMontage"));
 	
+	SetCurrentState(EBasicState::LOCO);
+
 	CurrentHP = MaxHP;
 }
 
@@ -61,6 +66,10 @@ void ABasicCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (GetController())
+	{
+		ControlRotation = GetController()->GetControlRotation();
+	}
 }
 
 // Called to bind functionality to input
@@ -120,7 +129,24 @@ void ABasicCharacter::PressJump()
 
 void ABasicCharacter::PrimaryShot()
 {
-	if (bIsAttackAvailable)
+	MainAttackFunc(EBasicState::PrimaryShot);
+}
+
+void ABasicCharacter::RAbilityShot()
+{
+	MainAttackFunc(EBasicState::RAbilityShot);
+}
+
+void ABasicCharacter::QAbilityShot()
+{
+	MainAttackFunc(EBasicState::QAbilityShot);
+}
+
+void ABasicCharacter::MainAttackFunc(EBasicState AttackState)
+{
+	switch (AttackState)
+	{
+	case EBasicState::PrimaryShot:
 	{
 		//bIsAttackAvailable = false;
 		FHitResult Hit;
@@ -128,41 +154,38 @@ void ABasicCharacter::PrimaryShot()
 		FVector End = Camera->GetForwardVector() * 50000.f;
 		TArray<AActor*> ActorsToIgnore;
 		ActorsToIgnore.Add(this);
-		
-		//SetCurrentState(EBasicState::PrimaryShot);
-		
+
+		SetCurrentState(EBasicState::PrimaryShot);
+		PlayAnimMontage(AttackMontage, 1.f, TEXT("PrimaryShot"));
 
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
 		{
-			ShotArrow(Hit.Location);
+			C2S_ShotArrow(Hit.Location);
 			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
-			UE_LOG(LogClass, Warning, TEXT("Trace : %s"), *Hit.BoneName.ToString());
 		}
 		else
 		{
-			ShotArrow(End);
+			C2S_ShotArrow(End);
 		}
+	}
+		break;
+	case EBasicState::RAbilityShot:
+		break;
+	case EBasicState::QAbilityShot:
+		break;
+	default:
+		break;
 	}
 }
 
-void ABasicCharacter::RAbilityShot()
-{
-}
-
-void ABasicCharacter::QAbilityShot()
-{
-}
-
-void ABasicCharacter::ShotArrow(FVector& TargetLocation)
+void ABasicCharacter::C2S_ShotArrow_Implementation(const FVector & TargetLocation)
 {
 	//GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketTransform(TEXT("arrow_anchor")));
 	FRotator LookRotator = UKismetMathLibrary::FindLookAtRotation(GetMesh()->GetSocketLocation(TEXT("arrow_anchor")), TargetLocation);
-	GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator);
 	switch (CurrentState)
 	{
 	case EBasicState::PrimaryShot:
-		GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, Camera->GetComponentLocation(), Camera->GetComponentRotation());
-		UE_LOG(LogClass, Warning, TEXT("InSpawnArrow"));
+		GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator);
 		break;
 	case EBasicState::RAbilityShot:
 		break;
@@ -197,6 +220,7 @@ void ABasicCharacter::SetCurrentState(EBasicState NewState)
 {
 	if (CurrentState != EBasicState::DEATH)
 	{
+		CurrentState = NewState;
 		switch (NewState)
 		{
 		case EBasicState::LOCO:
@@ -204,7 +228,7 @@ void ABasicCharacter::SetCurrentState(EBasicState NewState)
 			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		case EBasicState::PrimaryShot:
-			GetCharacterMovement()->MaxWalkSpeed = AttackMaxWalkSpeed;
+			GetCharacterMovement()->MaxWalkSpeed = IdleMaxWalkSpeed;
 			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		case EBasicState::RAbilityShot:

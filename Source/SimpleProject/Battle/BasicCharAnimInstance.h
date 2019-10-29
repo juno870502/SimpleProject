@@ -26,5 +26,14 @@ public:
 	float ABPAngle;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CharacterStatus")
+	float AimOffsetPitch;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CharacterStatus")
+	float AimOffsetYaw;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CharacterStatus")
 	EBasicState ABPCurrentState;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CharacterStatus")
+	float ControlRotationYaw;
 };

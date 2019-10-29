@@ -29,6 +29,10 @@ public:
 	class UStaticMeshComponent* StaticMesh;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	class UProjectileMovementComponent* Projectile;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	class UParticleSystemComponent* Particle;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	FLinearColor ParticleColor = FLinearColor(5.f, 5.f, 0.f);
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float CustomInitSpeed = 3000.f;
