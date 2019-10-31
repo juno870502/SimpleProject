@@ -17,6 +17,8 @@
 #include "Battle/BasicArrow.h"
 #include "Engine/World.h"
 #include "Animation/AnimMontage.h"
+#include "TimerManager.h"
+
 
 // Sets default values
 ABasicCharacter::ABasicCharacter()
@@ -66,10 +68,6 @@ void ABasicCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetController())
-	{
-		ControlRotation = GetController()->GetControlRotation();
-	}
 }
 
 // Called to bind functionality to input
@@ -83,8 +81,8 @@ void ABasicCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ABasicCharacter::Turn);
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ABasicCharacter::PressJump);
-	PlayerInputComponent->BindAction(TEXT("Attack1"), EInputEvent::IE_Pressed, this, &ABasicCharacter::PrimaryShot);
-	PlayerInputComponent->BindAction(TEXT("Attack2"), EInputEvent::IE_Pressed, this, &ABasicCharacter::RAbilityShot);
+	PlayerInputComponent->BindAction(TEXT("Attack1"), EInputEvent::IE_Pressed, this, &ABasicCharacter::LeftClick);
+	PlayerInputComponent->BindAction(TEXT("Attack2"), EInputEvent::IE_Pressed, this, &ABasicCharacter::RightClick);
 
 }
 
@@ -127,22 +125,62 @@ void ABasicCharacter::PressJump()
 	UE_LOG(LogClass, Warning, TEXT("InJump"));
 }
 
-void ABasicCharacter::PrimaryShot()
+void ABasicCharacter::LeftClick()
 {
-	MainAttackFunc(EBasicState::PrimaryShot);
+	if (InputTimerHandle.IsValid())
+	{
+		InputFlag += 1;
+	}
+	else
+	{
+		GetWorldTimerManager().SetTimer(InputTimerHandle, this, &ABasicCharacter::InputTimerFunc, ResetATKTime, false, ResetATKTime);
+		InputFlag += 1;
+	}
 }
 
-void ABasicCharacter::RAbilityShot()
+void ABasicCharacter::RightClick()
 {
-	MainAttackFunc(EBasicState::RAbilityShot);
+	if (InputTimerHandle.IsValid())
+	{
+		InputFlag += 2;
+	}
+	else
+	{
+		GetWorldTimerManager().SetTimer(InputTimerHandle, this, &ABasicCharacter::InputTimerFunc, ResetATKTime, false, ResetATKTime);
+		InputFlag += 2;
+	}
 }
 
-void ABasicCharacter::QAbilityShot()
+void ABasicCharacter::InputTimerFunc()
 {
-	MainAttackFunc(EBasicState::QAbilityShot);
+	GetWorldTimerManager().ClearTimer(InputTimerHandle);
+	switch (InputFlag)
+	{
+	case 1:
+		C2S_MainAttackFunc(EBasicState::PrimaryShot);
+		UE_LOG(LogClass, Warning, TEXT("PrimaryShot Call"));
+		break;
+	case 2:
+		C2S_MainAttackFunc(EBasicState::RAbilityShot);
+		UE_LOG(LogClass, Warning, TEXT("RAbilityShot Call"));
+		break;
+	case 3:
+		C2S_MainAttackFunc(EBasicState::QAbilityShot);
+		UE_LOG(LogClass, Warning, TEXT("QAbilityShot Call"));
+		break;
+	default:
+		UE_LOG(LogClass, Warning, TEXT("Error Shot Call"));
+		break;
+	}
+	InputFlag = 0;
 }
 
-void ABasicCharacter::MainAttackFunc(EBasicState AttackState)
+void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & AttackState)
+{
+	S2M_MainAttackFunc(AttackState);
+}
+
+void ABasicCharacter::S2M_MainAttackFunc_Implementation(const EBasicState& AttackState)
 {
 	switch (AttackState)
 	{
@@ -160,40 +198,59 @@ void ABasicCharacter::MainAttackFunc(EBasicState AttackState)
 
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
 		{
-			C2S_ShotArrow(Hit.Location);
-			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
+			ShotArrow(Hit.Location);
+			//UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
 		}
 		else
 		{
-			C2S_ShotArrow(End);
+			ShotArrow(End);
 		}
 	}
 		break;
 	case EBasicState::RAbilityShot:
+	{
+		SetCurrentState(EBasicState::RAbilityShot);
+		PlayAnimMontage(AttackMontage, 1.f, TEXT("RAbilityShot"));
+	}
 		break;
 	case EBasicState::QAbilityShot:
+	{
+		SetCurrentState(EBasicState::QAbilityShot);
+		FVector Normal45 = UKismetMathLibrary::Normal(GetActorForwardVector() + GetActorUpVector())* 50000.f;
+		ShotArrow(Normal45);
+		PlayAnimMontage(AttackMontage, 1.f, TEXT("QAbilityShot"));
+	}
 		break;
 	default:
 		break;
 	}
 }
 
-void ABasicCharacter::C2S_ShotArrow_Implementation(const FVector & TargetLocation)
+void ABasicCharacter::ShotArrow(const FVector & TargetLocation)
 {
 	//GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketTransform(TEXT("arrow_anchor")));
 	FRotator LookRotator = UKismetMathLibrary::FindLookAtRotation(GetMesh()->GetSocketLocation(TEXT("arrow_anchor")), TargetLocation);
+	FActorSpawnParameters Param;
+	Param.Owner = this;
 	switch (CurrentState)
 	{
 	case EBasicState::PrimaryShot:
-		GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator);
+		GetWorld()->SpawnActor<ABasicArrow>(PrimaryArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
 		break;
 	case EBasicState::RAbilityShot:
+		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
 		break;
 	case EBasicState::QAbilityShot:
+		GetWorld()->SpawnActor<ABasicArrow>(QAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
 		break;
 	default:
 		break;
 	}
+}
+
+void ABasicCharacter::SetAttackAvailable(bool NewAvailable)
+{
+	bIsAttackAvailable = NewAvailable;
 }
 
 float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -209,6 +266,8 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	case FPointDamageEvent::ClassID:
 		CurrentHP -= Damage;
 		UE_LOG(LogClass, Warning, TEXT("Current HP : %f"), CurrentHP);
+		UE_LOG(LogClass, Warning, TEXT("Damage Causer : %s"), *DamageCauser->GetName());
+		//UE_LOG(LogClass, Warning, TEXT("Damage Instigator : %s"), *EventInstigator->GetName());
 		break;
 	default:
 		break;

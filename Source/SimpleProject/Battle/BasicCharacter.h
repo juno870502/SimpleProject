@@ -74,11 +74,6 @@ public:
 
 public:
 
-	// I don't know how to get control rotation in multiplay game
-	// so create new variable to get control rotation
-	// Is this work?
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FRotator ControlRotation;
 
 	// Input Actions
 	void MoveForward(float Value);
@@ -87,17 +82,37 @@ public:
 	void LookUp(float Value);
 	void PressJump();
 
-	// Attack Function
-	void PrimaryShot();
-	void RAbilityShot();
-	void QAbilityShot();
-	void MainAttackFunc(EBasicState AttackState);
+	// Attack Input Function Timer
+	FTimerHandle InputTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float ResetATKTime = 0.01f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	int InputFlag = 0;
+
+	UFUNCTION()
+	void LeftClick();
+	UFUNCTION()
+	void RightClick();
+	UFUNCTION()
+	void InputTimerFunc();
+	
+	// C2S Attack Function - Pre Function call to Server Multicast
+	UFUNCTION(Server, Reliable)
+	void C2S_MainAttackFunc(const EBasicState& AttackState);
+	void C2S_MainAttackFunc_Implementation(const EBasicState& AttackState);
+	// S2M Attack Function
+	UFUNCTION(NetMulticast, Reliable)
+	void S2M_MainAttackFunc(const EBasicState& AttackState);
+	void S2M_MainAttackFunc_Implementation(const EBasicState& AttackState);
+
 	bool bIsAttackAvailable;
 
-	// Spawn in Server
-	UFUNCTION(Server, Reliable)
-	void C2S_ShotArrow(const FVector& TargetLocation);
-	void C2S_ShotArrow_Implementation(const FVector& TargetLocation);
+	// Spawn Arrow
+	void ShotArrow(const FVector& TargetLocation);
+
+	// Function to Available Attack
+	void SetAttackAvailable(bool NewAvailable);
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
@@ -105,8 +120,12 @@ public:
 	void SetCurrentState(EBasicState NewState);
 
 	// Arrow Setting in BP
-	UPROPERTY(EditAnywhere, Category = "Arrow")
-	TSubclassOf<class ABasicArrow> Arrow_Template;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	TSubclassOf<class ABasicArrow> PrimaryArrow;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	TSubclassOf<class ABasicArrow> RAbilityArrow;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+	TSubclassOf<class ABasicArrow> QAbilityArrow;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Anim")
 	class UAnimMontage* AttackMontage;

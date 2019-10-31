@@ -19,8 +19,8 @@ void UBasicCharAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		ABPAngle = CalculateDirection(Char->GetCharacterMovement()->Velocity, Char->GetActorRotation());
 		AimOffsetPitch = Char->GetBaseAimRotation().Pitch;
 		
-
-		FRotator TargetRotator = UKismetMathLibrary::NormalizedDeltaRotator(Char->GetControlRotation(), Char->GetActorRotation());	
+		
+		FRotator TargetRotator = UKismetMathLibrary::NormalizedDeltaRotator(Char->GetBaseAimRotation(), Char->GetActorRotation());
 		AimOffsetPitch = UKismetMathLibrary::Clamp(TargetRotator.Pitch, -90, 90);
 		AimOffsetYaw = UKismetMathLibrary::Clamp(TargetRotator.Yaw, -90, 90);
 

@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "BasicArrowDamageType.h"
 
 // Sets default values
 ABasicArrow::ABasicArrow()
@@ -13,6 +15,7 @@ ABasicArrow::ABasicArrow()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Set Basic Components
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	RootComponent = Box;
 	Box->SetBoxExtent(FVector(45.f, 5.f, 5.f));
@@ -22,12 +25,13 @@ ABasicArrow::ABasicArrow()
 
 	// Set box collision
 	Box->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-	Box->SetGenerateOverlapEvents(false);
+	StaticMesh->SetCollisionProfileName(TEXT("PlayerATK"));
+	Box->SetGenerateOverlapEvents(true);
 
 	// Set mesh collision
 	StaticMesh->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-	StaticMesh->SetCollisionProfileName(TEXT("PlayerATK"));
-	StaticMesh->SetGenerateOverlapEvents(true);
+	StaticMesh->SetCollisionProfileName(TEXT("NoCollision"));
+	StaticMesh->SetGenerateOverlapEvents(false);
 
 	// Set projectile movement setting
 	Projectile->bRotationFollowsVelocity = true;
@@ -52,7 +56,7 @@ void ABasicArrow::BeginPlay()
 	SetLifeSpan(10.f);
 
 	// Overlap Delegate
-	StaticMesh->OnComponentBeginOverlap.AddDynamic(this, &ABasicArrow::OnOverlapBegin);
+	Box->OnComponentBeginOverlap.AddDynamic(this, &ABasicArrow::OnOverlapBegin);
 }
 
 // Called every frame
@@ -63,6 +67,19 @@ void ABasicArrow::Tick(float DeltaTime)
 }
 
 void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
-{
-	UE_LOG(LogClass, Warning, TEXT("%s"), *OtherActor->GetName());
+{	
+	APawn* Pawn = Cast<APawn>(GetOwner());
+	if (Pawn)
+	{
+		if (OtherActor != Pawn)
+		{
+			APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
+			UE_LOG(LogClass, Warning, TEXT("In Apply Damage : %s"), *OtherActor->GetName());
+			UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, SweepResult.ImpactPoint, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
+			Destroy();
+			
+		}
+		
+	}
+	//UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, SweepResult.ImpactPoint, SweepResult, );
 }
