@@ -25,7 +25,7 @@ ABasicArrow::ABasicArrow()
 
 	// Set box collision
 	Box->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-	StaticMesh->SetCollisionProfileName(TEXT("PlayerATK"));
+	Box->SetCollisionProfileName(TEXT("PlayerATK"));
 	Box->SetGenerateOverlapEvents(true);
 
 	// Set mesh collision

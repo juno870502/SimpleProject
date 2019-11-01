@@ -46,7 +46,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
 	float CurrentHP;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
-	float AttackRange = 300.f;
+	float AttackRange = 800.f;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
 	float ChaseRange = 2000.f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
@@ -55,8 +55,17 @@ public:
 	void SetCurrentState(EMonsterState NewState);
 
 	// AttackMoment
+	// Server Call Multicast
+	UFUNCTION(NetMulticast, Reliable)
 	void MomentOfAttack();
+	void MomentOfAttack_Implementation();
 
 	// Initialize Values (HP, AttackRange, State etc...)
 	void InitializeValues();
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
+	TSubclassOf<class ABasicMonProjectile> Projectile;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Anim")
+	class UAnimMontage* AttackMontage;
 };

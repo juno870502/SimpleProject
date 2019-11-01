@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Battle/BasicArrowDamageType.h"
+#include "Battle/BasicMonProjectile.h"
 
 // Sets default values
 ABasicMonster::ABasicMonster()
@@ -27,6 +28,8 @@ ABasicMonster::ABasicMonster()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
+	AttackMontage = CreateDefaultSubobject<UAnimMontage>(TEXT("AttackMontage"));
 }
 
 // Called when the game starts or when spawned
@@ -114,13 +117,23 @@ void ABasicMonster::SetCurrentState(EMonsterState NewState)
 	}
 }
 
-void ABasicMonster::MomentOfAttack()
+
+void ABasicMonster::MomentOfAttack_Implementation()
 {
+	int FireNum = rand() % 2;
+	FString Str = "Fire_";
+	Str.AppendInt(FireNum);
+
+	UE_LOG(LogClass, Warning, TEXT("%s"), *Str);
+	float result = PlayAnimMontage(AttackMontage, 1.f, *Str);
+	UE_LOG(LogClass, Warning, TEXT("%f"), result);
 	TArray<AActor*> Ignore;
+	Ignore.Add(this);
 	FHitResult Hit;
 	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(), GetActorForwardVector()*5000.f, ETraceTypeQuery::TraceTypeQuery4, false, Ignore, EDrawDebugTrace::ForDuration, Hit, true))
 	{
-		UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
+		//UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
+		GetWorld()->SpawnActor<ABasicMonProjectile>(Projectile, GetActorLocation(), GetActorRotation());
 	}
 }
 

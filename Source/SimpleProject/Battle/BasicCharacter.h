@@ -112,7 +112,7 @@ public:
 	void ShotArrow(const FVector& TargetLocation);
 
 	// Function to Available Attack
-	void SetAttackAvailable(bool NewAvailable);
+	void SetAttackAvailability(bool NewAvailable);
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 

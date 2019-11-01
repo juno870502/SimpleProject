@@ -210,7 +210,8 @@ void ABasicCharacter::S2M_MainAttackFunc_Implementation(const EBasicState& Attac
 	case EBasicState::RAbilityShot:
 	{
 		SetCurrentState(EBasicState::RAbilityShot);
-		PlayAnimMontage(AttackMontage, 1.f, TEXT("RAbilityShot"));
+		PlayAnimMontage(AttackMontage, .7f, TEXT("RAbilityShot"));
+		ShotArrow(GetBaseAimRotation().Vector()*5000.f);
 	}
 		break;
 	case EBasicState::QAbilityShot:
@@ -238,17 +239,22 @@ void ABasicCharacter::ShotArrow(const FVector & TargetLocation)
 		GetWorld()->SpawnActor<ABasicArrow>(PrimaryArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
 		break;
 	case EBasicState::RAbilityShot:
-		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
+		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, -30.f, 0.f), Param);
+		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
+		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
+		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
+		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
 		break;
 	case EBasicState::QAbilityShot:
 		GetWorld()->SpawnActor<ABasicArrow>(QAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
+		
 		break;
 	default:
 		break;
 	}
 }
 
-void ABasicCharacter::SetAttackAvailable(bool NewAvailable)
+void ABasicCharacter::SetAttackAvailability(bool NewAvailable)
 {
 	bIsAttackAvailable = NewAvailable;
 }
@@ -265,8 +271,7 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 		break;
 	case FPointDamageEvent::ClassID:
 		CurrentHP -= Damage;
-		UE_LOG(LogClass, Warning, TEXT("Current HP : %f"), CurrentHP);
-		UE_LOG(LogClass, Warning, TEXT("Damage Causer : %s"), *DamageCauser->GetName());
+		UE_LOG(LogClass, Warning, TEXT("Damage Causer : %s, Current HP : %f"), *DamageCauser->GetName(), CurrentHP);
 		//UE_LOG(LogClass, Warning, TEXT("Damage Instigator : %s"), *EventInstigator->GetName());
 		break;
 	default:
@@ -291,7 +296,7 @@ void ABasicCharacter::SetCurrentState(EBasicState NewState)
 			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		case EBasicState::RAbilityShot:
-			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
+			GetCharacterMovement()->MaxWalkSpeed = AttackMaxWalkSpeed;
 			GetCharacterMovement()->RotationRate = AttackRotationRate;
 			break;
 		case EBasicState::QAbilityShot:

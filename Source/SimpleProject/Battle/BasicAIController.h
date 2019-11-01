@@ -44,14 +44,14 @@ public:
 
 	// Sense Sight Config Values
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
-	float SightRadiusValue = 500.f;
+	float SightRadiusValue = 1000.f;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
-	float LoseSightRadiusValue = 600.f;
+	float LoseSightRadiusValue = 1200.f;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
 	float SightAngleValue = 60.f;
 	// Sense Hearing Config Values
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
-	float HearingRange = 300.f;
+	float HearingRange = 600.f;
 
 	// GenericTeamID & Judge TeamAttitude
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "AI")
