@@ -10,14 +10,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "Battle/BasicArrowDamageType.h"
+#include "Battle/DamageType/BasicArrowDamageType.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
-#include "Battle/BasicArrow.h"
+#include "Battle/Arrow/BasicArrow.h"
 #include "Engine/World.h"
 #include "Animation/AnimMontage.h"
 #include "TimerManager.h"
+#include "Battle/BasicMonster.h"
+
 
 
 // Sets default values
@@ -177,10 +179,10 @@ void ABasicCharacter::InputTimerFunc()
 
 void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & AttackState)
 {
-	S2M_MainAttackFunc(AttackState);
+	S2A_MainAttackFunc(AttackState);
 }
 
-void ABasicCharacter::S2M_MainAttackFunc_Implementation(const EBasicState& AttackState)
+void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& AttackState)
 {
 	switch (AttackState)
 	{
@@ -263,6 +265,7 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 {
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
+	ABasicCharacter* BC = Cast<ABasicCharacter>(DamageCauser);
 	switch (DamageEvent.GetTypeID())
 	{
 	case FDamageEvent::ClassID:
@@ -270,11 +273,16 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	case FRadialDamageEvent::ClassID:
 		break;
 	case FPointDamageEvent::ClassID:
-		CurrentHP -= Damage;
-		UE_LOG(LogClass, Warning, TEXT("Damage Causer : %s, Current HP : %f"), *DamageCauser->GetName(), CurrentHP);
+		if (!BC->IsValidLowLevel())
+		{
+			CurrentHP -= Damage;
+			UE_LOG(LogClass, Warning, TEXT("Damage Causer : %s, Current HP : %f"), *DamageCauser->GetName(), CurrentHP);
+		}
+		//S2A_SetCurrentHP(CurrentHP);
 		//UE_LOG(LogClass, Warning, TEXT("Damage Instigator : %s"), *EventInstigator->GetName());
-		break;
-	default:
+		SetCurrentState(EBasicState::HIT);
+		const FPointDamageEvent* PDE = (FPointDamageEvent*)&DamageEvent;
+		LaunchCharacter(PDE->ShotDirection * 100.f, true, false);
 		break;
 	}
 	return 0.0f;

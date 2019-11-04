@@ -8,11 +8,16 @@
 
 ABasicGM::ABasicGM()
 {
-
+	bUseSeamlessTravel = true;
 }
 
 void ABasicGM::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ABasicGM::WorldTravelFunc()
+{
+	GetWorld()->ServerTravel(TEXT("Boss"), true);
 }

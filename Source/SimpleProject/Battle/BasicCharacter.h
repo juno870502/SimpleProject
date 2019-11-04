@@ -101,10 +101,10 @@ public:
 	UFUNCTION(Server, Reliable)
 	void C2S_MainAttackFunc(const EBasicState& AttackState);
 	void C2S_MainAttackFunc_Implementation(const EBasicState& AttackState);
-	// S2M Attack Function
+	// S2A Attack Function
 	UFUNCTION(NetMulticast, Reliable)
-	void S2M_MainAttackFunc(const EBasicState& AttackState);
-	void S2M_MainAttackFunc_Implementation(const EBasicState& AttackState);
+	void S2A_MainAttackFunc(const EBasicState& AttackState);
+	void S2A_MainAttackFunc_Implementation(const EBasicState& AttackState);
 
 	bool bIsAttackAvailable;
 
@@ -114,7 +114,9 @@ public:
 	// Function to Available Attack
 	void SetAttackAvailability(bool NewAvailable);
 
+	// Take Damage
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 
 	// Change State
 	void SetCurrentState(EBasicState NewState);

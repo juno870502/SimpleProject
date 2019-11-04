@@ -8,7 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Battle/BasicArrowDamageType.h"
+#include "Battle/DamageType/BasicMonsterDamageType.h"
 #include "Battle/BasicMonProjectile.h"
 
 // Sets default values
@@ -65,15 +65,19 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 	case FRadialDamageEvent::ClassID:
 		break;
 	case FPointDamageEvent::ClassID:
-		CurrentHP -= Damage;
-		UE_LOG(LogClass, Warning, TEXT("Current HP : %f"), CurrentHP);
-		if (CurrentHP <= 0)
+		if (DamageEvent.DamageTypeClass != UBasicMonsterDamageType::StaticClass())
 		{
-			SetCurrentState(EMonsterState::DEATH);
+			CurrentHP -= Damage;
+			UE_LOG(LogClass, Warning, TEXT("Monster Current HP : %f"), CurrentHP);
+			if (CurrentHP <= 0)
+			{
+				SetCurrentState(EMonsterState::DEATH);
+			}
 		}
+		UE_LOG(LogClass, Warning, TEXT("Hit Whatever"));
 		SetCurrentState(EMonsterState::HIT);
-		break;
-	default:
+		const FPointDamageEvent* PDE = (FPointDamageEvent*)&DamageEvent;
+		LaunchCharacter(PDE->ShotDirection * 1000.f, true, true);
 		break;
 	}
 	return Damage;
@@ -130,10 +134,12 @@ void ABasicMonster::MomentOfAttack_Implementation()
 	TArray<AActor*> Ignore;
 	Ignore.Add(this);
 	FHitResult Hit;
+	FActorSpawnParameters Param;
+	Param.Owner = this;
 	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(), GetActorForwardVector()*5000.f, ETraceTypeQuery::TraceTypeQuery4, false, Ignore, EDrawDebugTrace::ForDuration, Hit, true))
 	{
 		//UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
-		GetWorld()->SpawnActor<ABasicMonProjectile>(Projectile, GetActorLocation(), GetActorRotation());
+		GetWorld()->SpawnActor<ABasicMonProjectile>(Projectile, GetActorLocation(), GetActorRotation(), Param);
 	}
 }
 

@@ -17,4 +17,6 @@ class SIMPLEPROJECT_API ABasicGM : public AGameModeBase
 public:
 	ABasicGM();
 	virtual void BeginPlay() override;
+
+	void WorldTravelFunc();
 };

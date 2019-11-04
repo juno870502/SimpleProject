@@ -5,6 +5,10 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Battle/BasicCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Battle/DamageType/BasicMonsterDamageType.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 ABasicMonProjectile::ABasicMonProjectile()
@@ -36,6 +40,8 @@ ABasicMonProjectile::ABasicMonProjectile()
 	Projectile->ProjectileGravityScale = 0.f;
 	Projectile->Velocity = FVector(1.0f, 0.f, 0.f);
 	Projectile->InitialSpeed = CustomInitSpeed;
+
+	HitEffect = CreateDefaultSubobject<UParticleSystem>(TEXT("HitEffect"));
 }
 
 // Called when the game starts or when spawned
@@ -57,6 +63,16 @@ void ABasicMonProjectile::Tick(float DeltaTime)
 
 void ABasicMonProjectile::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	UE_LOG(LogClass, Warning, TEXT("Enemy Ball Hit : %s"), *OtherActor->GetName());
+	// Exclude Self Actor
+	APawn* Pawn = Cast<APawn>(GetOwner());
+	if (Pawn)
+	{
+		if (OtherActor != Pawn)
+		{
+			UGameplayStatics::ApplyPointDamage(OtherActor, 10.f, -SweepResult.Normal, SweepResult, nullptr, GetOwner(), UBasicMonsterDamageType::StaticClass());
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.Location);
+			Destroy();
+		}
+	}
 }
 
