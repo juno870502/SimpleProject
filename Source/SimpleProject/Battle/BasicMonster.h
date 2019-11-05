@@ -51,14 +51,18 @@ public:
 	float ChaseRange = 2000.f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 	EMonsterState CurrentState;
-	UFUNCTION()
-	void SetCurrentState(EMonsterState NewState);
+
+	// Change State
+	// Server Call Multicast
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_SetCurrentState(const EMonsterState& NewState);
+	void S2A_SetCurrentState_Implementation(const EMonsterState& NewState);
 
 	// AttackMoment
 	// Server Call Multicast
 	UFUNCTION(NetMulticast, Reliable)
-	void MomentOfAttack();
-	void MomentOfAttack_Implementation();
+	void S2A_MomentOfAttack();
+	void S2A_MomentOfAttack_Implementation();
 
 	// Initialize Values (HP, AttackRange, State etc...)
 	void InitializeValues();

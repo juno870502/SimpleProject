@@ -38,7 +38,7 @@ void ABasicMonster::BeginPlay()
 	Super::BeginPlay();
 	
 	CurrentHP = MaxHP;
-	SetCurrentState(EMonsterState::LOCO);
+	S2A_SetCurrentState(EMonsterState::LOCO);
 }
 
 // Called every frame
@@ -71,11 +71,11 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 			UE_LOG(LogClass, Warning, TEXT("Monster Current HP : %f"), CurrentHP);
 			if (CurrentHP <= 0)
 			{
-				SetCurrentState(EMonsterState::DEATH);
+				S2A_SetCurrentState(EMonsterState::DEATH);
 			}
 		}
 		UE_LOG(LogClass, Warning, TEXT("Hit Whatever"));
-		SetCurrentState(EMonsterState::HIT);
+		S2A_SetCurrentState(EMonsterState::HIT);
 		const FPointDamageEvent* PDE = (FPointDamageEvent*)&DamageEvent;
 		LaunchCharacter(PDE->ShotDirection * 1000.f, true, true);
 		break;
@@ -83,7 +83,7 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 	return Damage;
 }
 
-void ABasicMonster::SetCurrentState(EMonsterState NewState)
+void ABasicMonster::S2A_SetCurrentState_Implementation(const EMonsterState & NewState)
 {
 	if (CurrentState != EMonsterState::DEATH)
 	{
@@ -122,15 +122,11 @@ void ABasicMonster::SetCurrentState(EMonsterState NewState)
 }
 
 
-void ABasicMonster::MomentOfAttack_Implementation()
+void ABasicMonster::S2A_MomentOfAttack_Implementation()
 {
-	int FireNum = rand() % 2;
-	FString Str = "Fire_";
-	Str.AppendInt(FireNum);
+	FString Str = FString::Printf(TEXT("Fire_%d"), rand()%2);
 
-	UE_LOG(LogClass, Warning, TEXT("%s"), *Str);
-	float result = PlayAnimMontage(AttackMontage, 1.f, *Str);
-	UE_LOG(LogClass, Warning, TEXT("%f"), result);
+	PlayAnimMontage(AttackMontage, 1.f, *Str);
 	TArray<AActor*> Ignore;
 	Ignore.Add(this);
 	FHitResult Hit;
@@ -146,6 +142,6 @@ void ABasicMonster::MomentOfAttack_Implementation()
 void ABasicMonster::InitializeValues()
 {
 	CurrentHP = MaxHP;
-	SetCurrentState(EMonsterState::SPAWN);
+	S2A_SetCurrentState(EMonsterState::SPAWN);
 }
 

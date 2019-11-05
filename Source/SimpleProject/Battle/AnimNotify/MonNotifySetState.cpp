@@ -12,6 +12,6 @@ void UMonNotifySetState::Notify(USkeletalMeshComponent * MeshComp, UAnimSequence
 	ABasicMonster* Mon = Cast<ABasicMonster>(MeshComp->GetOwner());
 	if (Mon)
 	{
-		Mon->SetCurrentState(NewState);
+		Mon->S2A_SetCurrentState(NewState);
 	}
 }

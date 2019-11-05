@@ -13,7 +13,7 @@ EBTNodeResult::Type UBTT_ChangeCurrentState::ExecuteTask(UBehaviorTreeComponent 
 	ABasicMonster* Mon = Cast<ABasicMonster>(OwnerComp.GetAIOwner()->GetPawn());
 	if (Mon->IsValidLowLevel())
 	{
-		Mon->SetCurrentState(ChangeState);
+		Mon->S2A_SetCurrentState(ChangeState);
 		return EBTNodeResult::Succeeded;
 	}
 	return EBTNodeResult::Failed;

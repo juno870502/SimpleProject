@@ -36,12 +36,14 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
+	// Character Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class USpringArmComponent* Spring;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UCameraComponent* Camera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UAudioComponent* ShotArrowSound;
 
 	// TraceSetting in BP
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

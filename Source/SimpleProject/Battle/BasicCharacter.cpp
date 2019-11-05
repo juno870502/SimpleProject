@@ -19,7 +19,7 @@
 #include "Animation/AnimMontage.h"
 #include "TimerManager.h"
 #include "Battle/BasicMonster.h"
-
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -46,10 +46,9 @@ ABasicCharacter::ABasicCharacter()
 
 	bIsAttackAvailable = true;
 
-	// AI StimuliSource Config
-	//StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
-	//StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
-	//StimuliSource->RegisterForSense(UAISense_Hearing::StaticClass());
+	// Sound Setting
+	ShotArrowSound = CreateDefaultSubobject<UAudioComponent>(TEXT("ShotArrowSound"));
+	ShotArrowSound->bAutoActivate = false;
 
 	AttackMontage = CreateDefaultSubobject<UAnimMontage>(TEXT("AttackMontage"));
 	
@@ -195,8 +194,10 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 		TArray<AActor*> ActorsToIgnore;
 		ActorsToIgnore.Add(this);
 
+		// Set Shot Moment
 		SetCurrentState(EBasicState::PrimaryShot);
 		PlayAnimMontage(AttackMontage, 1.f, TEXT("PrimaryShot"));
+		ShotArrowSound->Play();
 
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
 		{
@@ -211,17 +212,23 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 		break;
 	case EBasicState::RAbilityShot:
 	{
+		// Set Shot Moment
 		SetCurrentState(EBasicState::RAbilityShot);
 		PlayAnimMontage(AttackMontage, .7f, TEXT("RAbilityShot"));
+		ShotArrowSound->Play();
+
 		ShotArrow(GetBaseAimRotation().Vector()*5000.f);
 	}
 		break;
 	case EBasicState::QAbilityShot:
 	{
+		// Set Shot Moment
 		SetCurrentState(EBasicState::QAbilityShot);
 		FVector Normal45 = UKismetMathLibrary::Normal(GetActorForwardVector() + GetActorUpVector())* 50000.f;
-		ShotArrow(Normal45);
 		PlayAnimMontage(AttackMontage, 1.f, TEXT("QAbilityShot"));
+		ShotArrowSound->Play();
+
+		ShotArrow(Normal45);
 	}
 		break;
 	default:

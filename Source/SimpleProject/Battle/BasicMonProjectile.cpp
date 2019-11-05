@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Battle/DamageType/BasicMonsterDamageType.h"
 #include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ABasicMonProjectile::ABasicMonProjectile()
@@ -19,9 +20,9 @@ ABasicMonProjectile::ABasicMonProjectile()
 	// Set Basic Components
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	RootComponent = Sphere;
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	StaticMesh->SetupAttachment(RootComponent);
 	Projectile = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile"));
+	BeamParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Beam"));
+	BeamParticle->SetupAttachment(RootComponent);
 
 	// Set Sphere
 	Sphere->SetSphereRadius(50.f);
@@ -29,11 +30,16 @@ ABasicMonProjectile::ABasicMonProjectile()
 	Sphere->SetCollisionProfileName(TEXT("MonATK"));
 	Sphere->SetGenerateOverlapEvents(true);
 
-	// Set mesh collision
-	StaticMesh->SetRelativeScale3D(FVector(.3f));
-	StaticMesh->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-	StaticMesh->SetCollisionProfileName(TEXT("NoCollision"));
-	StaticMesh->SetGenerateOverlapEvents(false);
+	// Set Mesh
+	//Mesh->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
+	//Mesh->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
+	//Mesh->SetCollisionProfileName(TEXT("NoCollision"));
+	//Mesh->SetGenerateOverlapEvents(false);
+
+	// Set Beam Particle
+	BeamParticle->SetRelativeLocation(FVector(-50.f, 0.f, 0.f));
+	BeamParticle->SetVectorParameter(TEXT("Source"), GetActorLocation() + FVector(-25.f, 0.f, 0.f));
+	BeamParticle->SetVectorParameter(TEXT("Target"), GetActorLocation() + FVector(100.f, 0.f, 0.f));
 
 	// Set projectile movement setting
 	Projectile->bRotationFollowsVelocity = true;
@@ -41,6 +47,7 @@ ABasicMonProjectile::ABasicMonProjectile()
 	Projectile->Velocity = FVector(1.0f, 0.f, 0.f);
 	Projectile->InitialSpeed = CustomInitSpeed;
 
+	// Hit Explosion Particle
 	HitEffect = CreateDefaultSubobject<UParticleSystem>(TEXT("HitEffect"));
 }
 
@@ -70,9 +77,10 @@ void ABasicMonProjectile::OnOverlapBegin(UPrimitiveComponent * OverlappedCompone
 		if (OtherActor != Pawn)
 		{
 			UGameplayStatics::ApplyPointDamage(OtherActor, 10.f, -SweepResult.Normal, SweepResult, nullptr, GetOwner(), UBasicMonsterDamageType::StaticClass());
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.Location);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint); 
 			Destroy();
 		}
 	}
 }
+
 

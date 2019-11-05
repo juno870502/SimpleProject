@@ -117,7 +117,7 @@ void ABasicAIController::SenseStuff(const TArray<AActor*>& UpdatedActors)
 	if (ClosestTargetActor->IsValidLowLevel())
 	{
 		BBComponent->SetValueAsObject(TEXT("TargetActor"), ClosestTargetActor);
-		Cast<ABasicMonster>(GetPawn())->SetCurrentState(EMonsterState::CHASE);
+		Cast<ABasicMonster>(GetPawn())->S2A_SetCurrentState(EMonsterState::CHASE);
 	}
 }
 
@@ -126,7 +126,7 @@ void ABasicAIController::SetPawnState(EMonsterState NewState)
 	ABasicMonster* Monster = Cast<ABasicMonster>(GetPawn());
 	if (Monster)
 	{
-		Monster->SetCurrentState(NewState);
+		Monster->S2A_SetCurrentState(NewState);
 	}
 }
 

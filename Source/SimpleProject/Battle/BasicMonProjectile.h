@@ -27,11 +27,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	class USphereComponent* Sphere;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	class UStaticMeshComponent* StaticMesh;
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	class UProjectileMovementComponent* Projectile;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	class UParticleSystemComponent* Particle;
+	class UParticleSystemComponent* BeamParticle;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FLinearColor ParticleColor = FLinearColor(5.f, 0.f, 0.f);
 

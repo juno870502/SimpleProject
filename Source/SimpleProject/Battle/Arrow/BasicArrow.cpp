@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Battle/DamageType/BasicArrowDamageType.h"
+#include "Sound/SoundBase.h"
 
 // Sets default values
 ABasicArrow::ABasicArrow()
@@ -18,10 +19,12 @@ ABasicArrow::ABasicArrow()
 	// Set Basic Components
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	RootComponent = Box;
-	Box->SetBoxExtent(FVector(45.f, 5.f, 5.f));
+	Box->SetBoxExtent(FVector(40.f, 10.f, 10.f));
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMesh->SetupAttachment(RootComponent);
 	Projectile = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile"));
+	HitArrowSound = CreateDefaultSubobject<USoundBase>(TEXT("HitArrowSound"));
+	//HitArrowSound->bAutoActivate = false;
 
 	// Set box collision
 	Box->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
@@ -78,6 +81,7 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 			APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
 			UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint);
+			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitArrowSound, SweepResult.ImpactPoint);
 			Destroy();
 		}
 	}

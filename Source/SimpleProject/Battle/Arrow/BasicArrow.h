@@ -35,11 +35,13 @@ public:
 	FLinearColor ParticleColor = FLinearColor(5.f, 5.f, 0.f);
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class UParticleSystem* HitEffect;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class USoundBase* HitArrowSound;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float CustomInitSpeed = 3000.f;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	class UParticleSystem* HitEffect;
 };

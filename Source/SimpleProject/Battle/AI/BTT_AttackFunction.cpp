@@ -13,7 +13,7 @@ EBTNodeResult::Type UBTT_AttackFunction::ExecuteTask(UBehaviorTreeComponent & Ow
 	if (AIC)
 	{
 		ABasicMonster* Mon = Cast<ABasicMonster>(AIC->GetPawn());
-		Mon->MomentOfAttack();
+		Mon->S2A_MomentOfAttack();
 
 		return EBTNodeResult::Succeeded;
 	}
