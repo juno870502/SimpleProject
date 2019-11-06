@@ -55,6 +55,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	float CurrentHP;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float MaxMP = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float CurrentMP;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	float IdleMaxWalkSpeed = 600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	float AttackMaxWalkSpeed = 300.f;
@@ -118,7 +122,6 @@ public:
 
 	// Take Damage
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
 
 	// Change State
 	void SetCurrentState(EBasicState NewState);

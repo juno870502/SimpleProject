@@ -7,9 +7,11 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Battle/BasicCharacter.h"
 #include "Kismet/GameplayStatics.h"
-#include "Battle/DamageType/BasicMonsterDamageType.h"
+#include "Battle/BasicAIController.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Battle/BasicMonster.h"
+#include "Battle/DamageType/BasicMonsterDamageType.h"
 
 // Sets default values
 ABasicMonProjectile::ABasicMonProjectile()
@@ -71,12 +73,14 @@ void ABasicMonProjectile::Tick(float DeltaTime)
 void ABasicMonProjectile::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	// Exclude Self Actor
-	APawn* Pawn = Cast<APawn>(GetOwner());
-	if (Pawn)
+	ABasicMonster* Mon = Cast<ABasicMonster>(GetOwner());
+	if (Mon)
 	{
-		if (OtherActor != Pawn)
+		if (OtherActor != Mon)
 		{
-			UGameplayStatics::ApplyPointDamage(OtherActor, 10.f, -SweepResult.Normal, SweepResult, nullptr, GetOwner(), UBasicMonsterDamageType::StaticClass());
+			ABasicAIController* BAIC = Cast<ABasicAIController>(Mon->GetController());
+			//UE_LOG(LogClass, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
+			UGameplayStatics::ApplyPointDamage(OtherActor, 1.f, -SweepResult.Normal, SweepResult, BAIC, Mon, UBasicMonsterDamageType::StaticClass());
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint); 
 			Destroy();
 		}

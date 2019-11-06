@@ -3,6 +3,7 @@
 
 #include "BasicPlayerController.h"
 #include "UserWidget.h"
+#include "Battle/BasicMainWidget.h"
 
 ABasicPlayerController::ABasicPlayerController()
 {
@@ -20,11 +21,27 @@ void ABasicPlayerController::BeginPlay()
 
 	if (IsLocalPlayerController())
 	{
-		UUserWidget* MainWidget = CreateWidget<UUserWidget>(this, MainWidgetClass);
+		MainWidget = CreateWidget<UBasicMainWidget>(this, MainWidgetClass);
 		if (MainWidget)
 		{
 			MainWidget->AddToViewport();
 		}
 	}
 	
+}
+
+void ABasicPlayerController::SetStatusHP(float NewHPPercent)
+{
+	if (MainWidget)
+	{
+		MainWidget->SetHP(NewHPPercent);
+	}
+}
+
+void ABasicPlayerController::SetStatusMP(float NewMPPercent)
+{
+	if (MainWidget)
+	{
+		MainWidget->SetMP(NewMPPercent);
+	}
 }

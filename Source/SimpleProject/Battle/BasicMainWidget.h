@@ -14,4 +14,16 @@ class SIMPLEPROJECT_API UBasicMainWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	class UProgressBar* HPBar;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	class UProgressBar* MPBar;
+
+	virtual void NativeConstruct() override;
+
+	void SetHP(float NewHPPercent);
+	void SetMP(float NewMPPercent);
 };

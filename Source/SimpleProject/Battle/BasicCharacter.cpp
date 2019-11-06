@@ -20,6 +20,7 @@
 #include "TimerManager.h"
 #include "Battle/BasicMonster.h"
 #include "Components/AudioComponent.h"
+#include "Battle/BasicPlayerController.h"
 
 
 // Sets default values
@@ -54,7 +55,9 @@ ABasicCharacter::ABasicCharacter()
 	
 	SetCurrentState(EBasicState::LOCO);
 
+	// Set Status
 	CurrentHP = MaxHP;
+	CurrentMP = 0.f;
 }
 
 // Called when the game starts or when spawned
@@ -280,10 +283,16 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	case FRadialDamageEvent::ClassID:
 		break;
 	case FPointDamageEvent::ClassID:
-		if (!BC->IsValidLowLevel())
+		// if Monster Attack Hit...
+		if (!BC)
 		{
 			CurrentHP -= Damage;
-			UE_LOG(LogClass, Warning, TEXT("Damage Causer : %s, Current HP : %f"), *DamageCauser->GetName(), CurrentHP);
+			ABasicPlayerController* BPC = Cast<ABasicPlayerController>(GetController());
+			if (BPC)
+			{
+				BPC->SetStatusHP(CurrentHP / MaxHP);
+			}
+			//UE_LOG(LogClass, Warning, TEXT("Damage Causer : %s, Current HP : %f"), *DamageCauser->GetName(), CurrentHP);
 		}
 		//S2A_SetCurrentHP(CurrentHP);
 		//UE_LOG(LogClass, Warning, TEXT("Damage Instigator : %s"), *EventInstigator->GetName());

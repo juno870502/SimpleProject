@@ -25,6 +25,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	TSubclassOf<UUserWidget> MainWidgetClass;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class UBasicMainWidget* MainWidget;
 
 	virtual void BeginPlay() override;
+
+	void SetStatusHP(float NewHPPercent);
+
+	void SetStatusMP(float NewMPPercent);
 };

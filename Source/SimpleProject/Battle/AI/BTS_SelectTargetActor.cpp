@@ -14,7 +14,7 @@ void UBTS_SelectTargetActor::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 
 	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(GetSelectedBlackboardKey()));
 	ABasicMonster* Mon = Cast<ABasicMonster>(OwnerComp.GetAIOwner()->GetPawn());
 
-	if (TargetActor->IsValidLowLevel() && Mon->IsValidLowLevel())
+	if (TargetActor && Mon)
 	{
 		// In Attack Range -> State::Attack / Out Attack Range -> State::Chase
 		if (Mon->AttackRange >= UKismetMathLibrary::Vector_Distance(Mon->GetActorLocation(), TargetActor->GetActorLocation()))

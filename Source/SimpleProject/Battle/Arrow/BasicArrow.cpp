@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Battle/DamageType/BasicArrowDamageType.h"
+#include "Battle/BasicCharacter.h"
 #include "Sound/SoundBase.h"
 
 // Sets default values
@@ -78,6 +79,10 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 	{
 		if (OtherActor != Pawn)
 		{
+			// Get Mana Point
+			ABasicCharacter* BC = Cast<ABasicCharacter>(GetOwner());
+			BC->CurrentMP += 10.f;
+			// Apply Damage And Play Effect 
 			APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
 			UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint);
