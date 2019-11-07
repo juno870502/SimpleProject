@@ -45,7 +45,10 @@ void ABasicAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetHomeLocation(GetPawn()->GetActorLocation());
+	if (GetPawn())
+	{
+		SetHomeLocation(GetPawn()->GetActorLocation());
+	}
 
 	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
 }

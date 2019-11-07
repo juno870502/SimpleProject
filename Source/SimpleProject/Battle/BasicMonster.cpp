@@ -10,12 +10,16 @@
 #include "Kismet/GameplayStatics.h"
 #include "Battle/DamageType/BasicMonsterDamageType.h"
 #include "Battle/BasicMonProjectile.h"
+#include "TimerManager.h"
+#include "time.h"
 
 // Sets default values
 ABasicMonster::ABasicMonster()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -88.f), FRotator(0.f, -90.f, 0.f));
 
 	AIControllerClass = ABasicAIController::StaticClass();
@@ -30,6 +34,7 @@ ABasicMonster::ABasicMonster()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
 	AttackMontage = CreateDefaultSubobject<UAnimMontage>(TEXT("AttackMontage"));
+
 }
 
 // Called when the game starts or when spawned
@@ -67,15 +72,19 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 	case FPointDamageEvent::ClassID:
 		if (DamageEvent.DamageTypeClass != UBasicMonsterDamageType::StaticClass())
 		{
-			CurrentHP -= Damage;
+			//DamageEvent.DamageTypeClass.
+			CurrentHP -= Damage * 50;
 			UE_LOG(LogClass, Warning, TEXT("Monster Current HP : %f"), CurrentHP);
 			if (CurrentHP <= 0)
 			{
 				S2A_SetCurrentState(EMonsterState::DEATH);
+				S2A_DeathFunction();
+			}
+			else
+			{
+				S2A_SetCurrentState(EMonsterState::HIT);
 			}
 		}
-		UE_LOG(LogClass, Warning, TEXT("Hit Whatever"));
-		S2A_SetCurrentState(EMonsterState::HIT);
 		const FPointDamageEvent* PDE = (FPointDamageEvent*)&DamageEvent;
 		LaunchCharacter(PDE->ShotDirection * 1000.f, true, true);
 		break;
@@ -143,5 +152,27 @@ void ABasicMonster::InitializeValues()
 {
 	CurrentHP = MaxHP;
 	S2A_SetCurrentState(EMonsterState::SPAWN);
+}
+
+void ABasicMonster::SpawnFunction()
+{
+	//GetWorldTimerManager().SetTimer(DissolveTimer, this, &ABasicMonster::DeathTimerFunc, 1.0f, false);
+}
+
+void ABasicMonster::S2A_DeathFunction_Implementation()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	GetWorldTimerManager().SetTimer(DissolveTimer, this, &ABasicMonster::DeathTimerFunc, 0.1f, true);
+}
+
+void ABasicMonster::DeathTimerFunc()
+{
+	DissolveParam += 0.1f;
+	UE_LOG(LogClass, Warning, TEXT("WOW! DestroyTimer!"));
+	GetMesh()->SetScalarParameterValueOnMaterials(TEXT("Dissolve"), DissolveParam / 3);
+	if (DissolveParam >= DissolveTimerLimit)
+	{
+		Destroy();
+	}
 }
 

@@ -61,8 +61,8 @@ public:
 	// AttackMoment
 	// Server Call Multicast
 	UFUNCTION(NetMulticast, Reliable)
-	void S2A_MomentOfAttack();
-	void S2A_MomentOfAttack_Implementation();
+	virtual void S2A_MomentOfAttack();
+	virtual void S2A_MomentOfAttack_Implementation();
 
 	// Initialize Values (HP, AttackRange, State etc...)
 	void InitializeValues();
@@ -72,4 +72,19 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Anim")
 	class UAnimMontage* AttackMontage;
+
+	// Monster Spawn Function(Spawn effect and Initialize)
+	void SpawnFunction();
+
+	// Monster Death Function(Death effect)
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_DeathFunction();
+	void S2A_DeathFunction_Implementation();
+	UFUNCTION()
+	void DeathTimerFunc();
+
+	FTimerHandle DissolveTimer;
+	float DissolveParam = 0.f;
+	float DissolveTimerLimit = 3.f;
+
 };
