@@ -19,6 +19,8 @@ class SIMPLEPROJECT_API ABasicAIController : public AAIController
 public:
 	ABasicAIController();
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 	
 	// Setup At Blueprint
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -35,6 +37,9 @@ public:
 	class UAISenseConfig_Hearing* Hearing;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class UAISenseConfig_Damage* Damaging;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	AActor* ClosestTargetActor;
 
 	// Initialize AI (Change BlackBoard Key Values)
 	void InitializeAI();
@@ -65,9 +70,6 @@ public:
 
 	// Set Pawn State
 	void SetPawnState(EMonsterState NewState);
-	
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	AActor* ClosestTargetActor;
 
 	// In Death, Respawn Function
 	void Respawn();

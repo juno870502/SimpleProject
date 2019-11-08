@@ -45,12 +45,28 @@ void ABasicAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+void ABasicAIController::OnPossess(APawn * InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	// Setup BB & BT
+	UseBlackboard(BB, BBComponent);
+	RunBehaviorTree(BT);
+
 	if (GetPawn())
 	{
 		SetHomeLocation(GetPawn()->GetActorLocation());
 	}
 
+	// Setup AIPerception
 	AIPerception->OnPerceptionUpdated.AddDynamic(this, &ABasicAIController::SenseStuff);
+}
+
+void ABasicAIController::OnUnPossess()
+{
+	Super::OnUnPossess();
 }
 
 void ABasicAIController::InitializeAI()
@@ -68,8 +84,6 @@ void ABasicAIController::SetHomeLocation(FVector NewLocation)
 {
 	if (BB && BBComponent && BT)
 	{
-		UseBlackboard(BB, BBComponent);
-		RunBehaviorTree(BT);
 		GetBlackboardComponent()->SetValueAsVector(TEXT("HomeLocation"), NewLocation);
 	}
 }

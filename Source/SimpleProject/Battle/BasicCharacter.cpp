@@ -202,7 +202,7 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 		PlayAnimMontage(AttackMontage, 1.f, TEXT("PrimaryShot"));
 		ShotArrowSound->Play();
 
-		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, Hit, true))
+		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::None, Hit, true))
 		{
 			ShotArrow(Hit.Location);
 			//UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());

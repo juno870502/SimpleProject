@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "NavigationSystem.h"
+#include "Battle/BasicGS.h"
 
 ABasicGM::ABasicGM()
 {
@@ -32,15 +33,21 @@ void ABasicGM::PostLogin(APlayerController * NewPlayer)
 
 	PartyNumber++;
 	MaxMonsterNumber += PartyNumber * 10;
+	GetGameState<ABasicGS>();
 }
 
 void ABasicGM::SpawnFunction()
 {
 	//GetPlayer
 	//FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation")), 500.f);
-	FVector SpanwLocation = UNavigationSystemV1::GetRandomReachablePointInRadius(GetWorld(), FVector(0), 2000.f);
-	FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
-	ABasicMonster* Mon = GetWorld()->SpawnActor<ABasicMonster>(MonsterClass, SpanwLocation, SpawnRotation);
-	ABasicAIController* AIC = GetWorld()->SpawnActor<ABasicAIController>(MonsterAIClass);
-	AIC->Possess(Mon);
+	if (NumOfMonster < MaxMonsterNumber)
+	{
+		FVector SpanwLocation = UNavigationSystemV1::GetRandomReachablePointInRadius(GetWorld(), FVector(0), 2000.f);
+		FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
+		ABasicMonster* Mon = GetWorld()->SpawnActor<ABasicMonster>(MonsterClass, SpanwLocation, SpawnRotation);
+		NumOfMonster++;
+	}
+	
+	//ABasicAIController* AIC = GetWorld()->SpawnActor<ABasicAIController>(MonsterAIClass);
+	//AIC->Possess(Mon);
 }

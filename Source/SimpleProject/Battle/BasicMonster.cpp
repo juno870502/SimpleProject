@@ -35,6 +35,7 @@ ABasicMonster::ABasicMonster()
 
 	AttackMontage = CreateDefaultSubobject<UAnimMontage>(TEXT("AttackMontage"));
 
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 // Called when the game starts or when spawned
@@ -42,8 +43,11 @@ void ABasicMonster::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GetMesh()->SetScalarParameterValueOnMaterials(TEXT("Dissolve"), DissolveParam);
 	CurrentHP = MaxHP;
-	S2A_SetCurrentState(EMonsterState::LOCO);
+	S2A_SetCurrentState(EMonsterState::SPAWN);
+
+	SpawnFunction();
 }
 
 // Called every frame
@@ -141,7 +145,7 @@ void ABasicMonster::S2A_MomentOfAttack_Implementation()
 	FHitResult Hit;
 	FActorSpawnParameters Param;
 	Param.Owner = this;
-	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(), GetActorForwardVector()*5000.f, ETraceTypeQuery::TraceTypeQuery4, false, Ignore, EDrawDebugTrace::ForDuration, Hit, true))
+	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(), GetActorForwardVector()*5000.f, ETraceTypeQuery::TraceTypeQuery4, false, Ignore, EDrawDebugTrace::None, Hit, true))
 	{
 		//UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
 		GetWorld()->SpawnActor<ABasicMonProjectile>(Projectile, GetActorLocation(), GetActorRotation(), Param);
@@ -156,7 +160,20 @@ void ABasicMonster::InitializeValues()
 
 void ABasicMonster::SpawnFunction()
 {
-	//GetWorldTimerManager().SetTimer(DissolveTimer, this, &ABasicMonster::DeathTimerFunc, 1.0f, false);
+	GetWorldTimerManager().SetTimer(DissolveTimer, this, &ABasicMonster::SpawnTimerFunc, 0.1f, true);
+}
+
+void ABasicMonster::SpawnTimerFunc()
+{
+	if (DissolveParam > 0.f)
+	{
+		DissolveParam = DissolveParam - 0.1f;
+		GetMesh()->SetScalarParameterValueOnMaterials(TEXT("Dissolve"), DissolveParam);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(DissolveTimer);
+	}
 }
 
 void ABasicMonster::S2A_DeathFunction_Implementation()
@@ -168,7 +185,6 @@ void ABasicMonster::S2A_DeathFunction_Implementation()
 void ABasicMonster::DeathTimerFunc()
 {
 	DissolveParam += 0.1f;
-	UE_LOG(LogClass, Warning, TEXT("WOW! DestroyTimer!"));
 	GetMesh()->SetScalarParameterValueOnMaterials(TEXT("Dissolve"), DissolveParam / 3);
 	if (DissolveParam >= DissolveTimerLimit)
 	{

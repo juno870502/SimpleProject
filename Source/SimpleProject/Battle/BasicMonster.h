@@ -75,6 +75,8 @@ public:
 
 	// Monster Spawn Function(Spawn effect and Initialize)
 	void SpawnFunction();
+	UFUNCTION()
+	void SpawnTimerFunc();
 
 	// Monster Death Function(Death effect)
 	UFUNCTION(NetMulticast, Reliable)
@@ -84,7 +86,9 @@ public:
 	void DeathTimerFunc();
 
 	FTimerHandle DissolveTimer;
-	float DissolveParam = 0.f;
+	float DissolveParam = 1.f;
 	float DissolveTimerLimit = 3.f;
 
+	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf	<class ABasicAIController> BaseAIC;*/
 };

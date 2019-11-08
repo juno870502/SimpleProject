@@ -29,6 +29,8 @@ public:
 	// Max Spawn Monster Number
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	int MaxMonsterNumber = 10;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	int NumOfMonster = 0;
 	// Spawn Monster Late per Seconds (1~5)
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float SpawnLate;
