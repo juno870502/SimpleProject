@@ -73,6 +73,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	EBasicState CurrentState;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+	float RAbilityConsumption = 20.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
+		float QAbilityConsumption = 50.f;
+	// Change Charactre MP
+	void SetCurrentMP(float NewMP);
+
 	// StimuliSource
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UAIPerceptionStimuliSourceComponent* StimuliSource;
@@ -90,20 +97,28 @@ public:
 
 	// Attack Input Function Timer
 	FTimerHandle InputTimerHandle;
+	FTimerHandle ChargeTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float ResetATKTime = 0.01f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	int InputFlag = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	int ChargeFlag = 0;
 
 	UFUNCTION()
 	void LeftClick();
 	UFUNCTION()
+	void LeftRelease();
+	UFUNCTION()
 	void RightClick();
 	UFUNCTION()
 	void InputTimerFunc();
+	UFUNCTION()
+	void ChargeTimerFunc();
 	
 	// C2S Attack Function - Pre Function call to Server Multicast
+	// Plus, Attack Available Check Process
 	UFUNCTION(Server, Reliable)
 	void C2S_MainAttackFunc(const EBasicState& AttackState);
 	void C2S_MainAttackFunc_Implementation(const EBasicState& AttackState);

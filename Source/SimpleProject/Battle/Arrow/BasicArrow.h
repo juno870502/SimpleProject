@@ -42,6 +42,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float CustomInitSpeed = 3000.f;
 
+	// Charge Shot Func
+	void ChargeFunction(int ChargeValue);
+	// Charge Shot Value
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	int ChargeFlag = 0;
+
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 };

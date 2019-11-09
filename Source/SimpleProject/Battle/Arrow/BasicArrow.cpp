@@ -60,6 +60,8 @@ void ABasicArrow::BeginPlay()
 	// Set Destroy Time
 	SetLifeSpan(10.f);
 
+
+
 	// Overlap Delegate
 	Box->OnComponentBeginOverlap.AddDynamic(this, &ABasicArrow::OnOverlapBegin);
 }
@@ -69,6 +71,24 @@ void ABasicArrow::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABasicArrow::ChargeFunction(int ChargeValue)
+{
+	ChargeFlag = ChargeValue;
+	// Set Charge Shot Color
+	if (ChargeFlag == 0)
+	{
+		Particle->SetColorParameter(TEXT("color"), FLinearColor(5.0f, 5.0f, 5.0f));
+	}
+	else if (ChargeFlag == 1)
+	{
+		Particle->SetColorParameter(TEXT("color"), FLinearColor(7.0f, 7.0f, 0.0f));
+	}
+	else if (ChargeFlag == 2)
+	{
+		Particle->SetColorParameter(TEXT("color"), FLinearColor(10.0f, 0.0f, 5.0f));
+	}
 }
 
 void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -81,7 +101,7 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 		{
 			// Get Mana Point
 			ABasicCharacter* BC = Cast<ABasicCharacter>(GetOwner());
-			BC->CurrentMP += 10.f;
+			BC->SetCurrentMP(BC->CurrentMP + 10);
 			// Apply Damage And Play Effect 
 			APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
 			UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
