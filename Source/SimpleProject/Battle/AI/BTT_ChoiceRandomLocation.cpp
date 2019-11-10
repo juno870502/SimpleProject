@@ -12,9 +12,12 @@ EBTNodeResult::Type UBTT_ChoiceRandomLocation::ExecuteTask(UBehaviorTreeComponen
 
 	ABasicAIController* AIC = Cast<ABasicAIController>(OwnerComp.GetAIOwner());
 
-	if (AIC)
+	UNavigationSystemV1* NavV1 = Cast<UNavigationSystemV1>(GetWorld()->GetNavigationSystem());
+
+	FNavLocation TargetVec;
+	if (AIC && NavV1)
 	{
-		FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation")), 500.f);
+		NavV1->GetRandomPointInNavigableRadius(OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation")), 500.f, TargetVec);
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(TEXT("TargetLocation"), TargetVec);
 		return EBTNodeResult::Succeeded;
 	}
