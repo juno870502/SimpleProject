@@ -3,7 +3,7 @@
 
 #include "BasicPlayerController.h"
 #include "UserWidget.h"
-#include "Battle/BasicMainWidget.h"
+#include "Battle/UI/BasicMainWidget.h"
 
 ABasicPlayerController::ABasicPlayerController()
 {

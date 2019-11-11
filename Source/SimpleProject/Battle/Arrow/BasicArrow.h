@@ -42,8 +42,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float CustomInitSpeed = 3000.f;
 
-	// Charge Shot Func
-	void ChargeFunction(int ChargeValue);
+	// MutiCast Charge Shot Func
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_ChargeFunction(int ChargeValue);
+	void S2A_ChargeFunction_Implementation(int ChargeValue);
 	// Charge Shot Value
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	int ChargeFlag = 0;

@@ -50,6 +50,9 @@ ABasicArrow::ABasicArrow()
 	Particle->SetColorParameter(TEXT("color"), ParticleColor);
 	
 	HitEffect = CreateDefaultSubobject<UParticleSystem>(TEXT("HitEffect"));
+
+	// Replicated on
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -73,21 +76,24 @@ void ABasicArrow::Tick(float DeltaTime)
 
 }
 
-void ABasicArrow::ChargeFunction(int ChargeValue)
+void ABasicArrow::S2A_ChargeFunction_Implementation(int ChargeValue)
 {
 	ChargeFlag = ChargeValue;
 	// Set Charge Shot Color
 	if (ChargeFlag == 0)
 	{
 		Particle->SetColorParameter(TEXT("color"), FLinearColor(5.0f, 5.0f, 5.0f));
+		Particle->SetRelativeScale3D(FVector(.3f));
 	}
 	else if (ChargeFlag == 1)
 	{
 		Particle->SetColorParameter(TEXT("color"), FLinearColor(7.0f, 7.0f, 0.0f));
+		Particle->SetRelativeScale3D(FVector(.5f));
 	}
 	else if (ChargeFlag == 2)
 	{
-		Particle->SetColorParameter(TEXT("color"), FLinearColor(10.0f, 0.0f, 5.0f));
+		Particle->SetColorParameter(TEXT("color"), FLinearColor(10.0f, 0.0f, 0.0f));
+		Particle->SetRelativeScale3D(FVector(.7f));
 	}
 }
 
@@ -107,7 +113,14 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 			UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint);
 			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitArrowSound, SweepResult.ImpactPoint);
-			Destroy();
+			if (ChargeFlag > 0)
+			{
+				ChargeFlag--;
+			}
+			else
+			{
+				Destroy();
+			}
 		}
 	}
 	//UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, SweepResult.ImpactPoint, SweepResult, );

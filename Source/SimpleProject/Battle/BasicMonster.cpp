@@ -9,7 +9,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Battle/DamageType/BasicMonsterDamageType.h"
+#include "Battle/DamageType/BasicArrowRainDamageType.h"
 #include "Battle/BasicMonProjectile.h"
+#include "Battle/BasicGS.h"
 #include "TimerManager.h"
 #include "time.h"
 
@@ -72,6 +74,20 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 	case FDamageEvent::ClassID:
 		break;
 	case FRadialDamageEvent::ClassID:
+		if (DamageEvent.DamageTypeClass == UBasicArrowRainDamageType::StaticClass())
+		{
+			CurrentHP -= Damage;
+			UE_LOG(LogClass, Warning, TEXT("Monster Current HP : %f"), CurrentHP);
+			if (CurrentHP <= 0)
+			{
+				S2A_SetCurrentState(EMonsterState::DEATH);
+				S2A_DeathFunction();
+			}
+			else
+			{
+				S2A_SetCurrentState(EMonsterState::HIT);
+			}
+		}
 		break;
 	case FPointDamageEvent::ClassID:
 		if (DamageEvent.DamageTypeClass != UBasicMonsterDamageType::StaticClass())
@@ -179,6 +195,7 @@ void ABasicMonster::SpawnTimerFunc()
 void ABasicMonster::S2A_DeathFunction_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	GetWorldTimerManager().SetTimer(DissolveTimer, this, &ABasicMonster::DeathTimerFunc, 0.1f, true);
 }
 
@@ -188,6 +205,8 @@ void ABasicMonster::DeathTimerFunc()
 	GetMesh()->SetScalarParameterValueOnMaterials(TEXT("Dissolve"), DissolveParam / 3);
 	if (DissolveParam >= DissolveTimerLimit)
 	{
+		ABasicGS* GS = Cast<ABasicGS>(GetWorld()->GetGameState());
+		GS->NumOfDeathMonsters++;
 		Destroy();
 	}
 }

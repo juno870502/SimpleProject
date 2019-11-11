@@ -26,4 +26,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AActor> ArrowRain;
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyRadialDamageFunction();
 };

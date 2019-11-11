@@ -6,6 +6,9 @@
 #include "Engine/World.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Battle/BasicCharacter.h"
+#include "Battle/DamageType/BasicArrowRainDamageType.h"
 
 void ABasicArrowRainSpawner::BeginPlay()
 {
@@ -26,4 +29,11 @@ void ABasicArrowRainSpawner::SpawnFunction()
 	GetWorld()->SpawnActor<AActor>(ArrowRain, GetActorLocation(), GetActorRotation().Add(-45.f, 0.f, 0.f));
 	GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
 	Destroy();
+}
+
+void ABasicArrowRainSpawner::ApplyRadialDamageFunction()
+{
+	TArray<AActor*> IgnoreActors;
+	
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50.f, GetActorLocation(), 1000.f, UBasicArrowRainDamageType::StaticClass(), IgnoreActors);
 }

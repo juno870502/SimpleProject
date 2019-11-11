@@ -120,12 +120,12 @@ public:
 	// C2S Attack Function - Pre Function call to Server Multicast
 	// Plus, Attack Available Check Process
 	UFUNCTION(Server, Reliable)
-	void C2S_MainAttackFunc(const EBasicState& AttackState);
-	void C2S_MainAttackFunc_Implementation(const EBasicState& AttackState);
+	void C2S_MainAttackFunc(const EBasicState& AttackState, int ChargeParam = 0);
+	void C2S_MainAttackFunc_Implementation(const EBasicState& AttackState, int ChargeParam = 0);
 	// S2A Attack Function
 	UFUNCTION(NetMulticast, Reliable)
-	void S2A_MainAttackFunc(const EBasicState& AttackState);
-	void S2A_MainAttackFunc_Implementation(const EBasicState& AttackState);
+	void S2A_MainAttackFunc(const EBasicState& AttackState, FVector TargetVector);
+	void S2A_MainAttackFunc_Implementation(const EBasicState& AttackState, FVector TargetVector);
 
 	bool bIsAttackAvailable;
 

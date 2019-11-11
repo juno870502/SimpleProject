@@ -4,22 +4,22 @@
 #include "BasicCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/InputComponent.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "Battle/DamageType/BasicArrowDamageType.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
-#include "Battle/Arrow/BasicArrow.h"
 #include "Engine/World.h"
 #include "Animation/AnimMontage.h"
 #include "TimerManager.h"
+#include "Battle/Arrow/BasicArrow.h"
 #include "Battle/BasicMonster.h"
-#include "Components/AudioComponent.h"
+#include "Battle/DamageType/BasicArrowDamageType.h"
 #include "Battle/BasicPlayerController.h"
 
 
@@ -151,14 +151,14 @@ void ABasicCharacter::LeftClick()
 		GetWorldTimerManager().SetTimer(InputTimerHandle, this, &ABasicCharacter::InputTimerFunc, ResetATKTime, false, ResetATKTime);
 		InputFlag += 1;
 	}
-	GetWorldTimerManager().SetTimer(ChargeTimerHandle, this, &ABasicCharacter::ChargeTimerFunc, 0.5f, true);
+	GetWorldTimerManager().SetTimer(ChargeTimerHandle, this, &ABasicCharacter::ChargeTimerFunc, 0.5f, true, .5f);
 }
 
 void ABasicCharacter::LeftRelease()
 {
 	if (ChargeFlag > 0)
 	{
-		C2S_MainAttackFunc(EBasicState::PrimaryShot);
+		C2S_MainAttackFunc(EBasicState::PrimaryShot, ChargeFlag);
 		UE_LOG(LogClass, Warning, TEXT("ChargeShot Call"));
 	}
 	GetWorldTimerManager().ClearTimer(ChargeTimerHandle);
@@ -211,41 +211,52 @@ void ABasicCharacter::ChargeTimerFunc()
 	}
 }
 
-void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & AttackState)
+void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & AttackState, int ChargeParam)
 {
 	if (bIsAttackAvailable)
 	{
-		S2A_MainAttackFunc(AttackState);
+		ChargeFlag = ChargeParam;
+
+		ABasicPlayerController* PC = Cast<ABasicPlayerController>(GetController());
+		int SizeX;
+		int SizeY;
+		FVector CrosshairLocation;
+		FVector CrosshairDirection;
+
+		FHitResult Hit;
+		PC->GetViewportSize(SizeX, SizeY);
+		PC->DeprojectScreenPositionToWorld(SizeX / 2.0, SizeY / 2.0, CrosshairLocation, CrosshairDirection);
+		FVector Start = Camera->GetComponentLocation();
+		FVector End = Camera->GetComponentLocation() + CrosshairDirection * 5000.f;
+		//bIsAttackAvailable = false;
+		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(this);
+		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::None, Hit, true))
+		{
+			S2A_MainAttackFunc(AttackState, Hit.Location);
+		}
+		else
+		{
+			S2A_MainAttackFunc(AttackState, End);
+		}
 	}
 }
 
-void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& AttackState)
+void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& AttackState, FVector TargetVector)
 {
+	
 	switch (AttackState)
 	{
 	case EBasicState::PrimaryShot:
 	{
-		//bIsAttackAvailable = false;
-		FHitResult Hit;
-		FVector Start = Camera->GetComponentLocation();
-		FVector End = Camera->GetForwardVector() * 50000.f;
-		TArray<AActor*> ActorsToIgnore;
-		ActorsToIgnore.Add(this);
+
 
 		// Set Shot Moment
 		SetCurrentState(EBasicState::PrimaryShot);
 		PlayAnimMontage(AttackMontage, 1.f, TEXT("PrimaryShot"));
 		ShotArrowSound->Play();
 
-		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::None, Hit, true))
-		{
-			ShotArrow(Hit.Location);
-			//UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.0f, this->GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
-		}
-		else
-		{
-			ShotArrow(End);
-		}
+		ShotArrow(TargetVector);
 		bIsAttackAvailable = false;
 	}
 		break;
@@ -259,8 +270,7 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 			SetCurrentState(EBasicState::RAbilityShot);
 			PlayAnimMontage(AttackMontage, .7f, TEXT("RAbilityShot"));
 			ShotArrowSound->Play();
-
-			ShotArrow(GetBaseAimRotation().Vector() * 5000.f);
+			ShotArrow(TargetVector);
 			bIsAttackAvailable = false;
 		}
 	}
@@ -276,7 +286,6 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 			FVector Normal45 = UKismetMathLibrary::Normal(GetActorForwardVector() + GetActorUpVector()) * 50000.f;
 			PlayAnimMontage(AttackMontage, 1.f, TEXT("QAbilityShot"));
 			ShotArrowSound->Play();
-
 			ShotArrow(Normal45);
 			bIsAttackAvailable = false;
 		}
@@ -289,29 +298,33 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 
 void ABasicCharacter::ShotArrow(const FVector & TargetLocation)
 {
-	//GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketTransform(TEXT("arrow_anchor")));
-	FRotator LookRotator = UKismetMathLibrary::FindLookAtRotation(GetMesh()->GetSocketLocation(TEXT("arrow_anchor")), TargetLocation);
-	FActorSpawnParameters Param;
-	Param.Owner = this;
-	ABasicArrow* Arrow;
-	switch (CurrentState)
+	if (HasAuthority())
 	{
-	case EBasicState::PrimaryShot:
-		Arrow = GetWorld()->SpawnActor<ABasicArrow>(PrimaryArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
-		Arrow->ChargeFunction(ChargeFlag);
-		break;
-	case EBasicState::RAbilityShot:
-		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, -30.f, 0.f), Param);
-		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
-		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
-		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
-		GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
-		break;
-	case EBasicState::QAbilityShot:
-		GetWorld()->SpawnActor<ABasicArrow>(QAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
-		
-		break;
+		//GetWorld()->SpawnActor<ABasicArrow>(Arrow_Template, GetMesh()->GetSocketTransform(TEXT("arrow_anchor")));
+		FRotator LookRotator = UKismetMathLibrary::FindLookAtRotation(GetMesh()->GetSocketLocation(TEXT("arrow_anchor")), TargetLocation);
+		FActorSpawnParameters Param;
+		Param.Owner = this;
+		ABasicArrow* Arrow;
+		switch (CurrentState)
+		{
+		case EBasicState::PrimaryShot:
+			Arrow = GetWorld()->SpawnActor<ABasicArrow>(PrimaryArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
+			UE_LOG(LogClass, Warning, TEXT("Charge Flag : %d"), ChargeFlag);
+			Arrow->S2A_ChargeFunction(ChargeFlag);
+			break;
+		case EBasicState::RAbilityShot:
+			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, -30.f, 0.f), Param);
+			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
+			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
+			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
+			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
+			break;
+		case EBasicState::QAbilityShot:
+			GetWorld()->SpawnActor<ABasicArrow>(QAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
 
+			break;
+
+		}
 	}
 }
 
@@ -369,7 +382,7 @@ void ABasicCharacter::SetCurrentState(EBasicState NewState)
 			GetCharacterMovement()->RotationRate = IdleRotationRate;
 			break;
 		case EBasicState::RAbilityShot:
-			GetCharacterMovement()->MaxWalkSpeed = AttackMaxWalkSpeed;
+			GetCharacterMovement()->MaxWalkSpeed = OtherMaxWalkSpeed;
 			GetCharacterMovement()->RotationRate = AttackRotationRate;
 			break;
 		case EBasicState::QAbilityShot:

@@ -14,4 +14,14 @@ class SIMPLEPROJECT_API ABasicGS : public AGameStateBase
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = "OnRep_NumOfDeath")
+	int NumOfDeathMonsters = 0;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	int NumOfMonsters;
+
+	UFUNCTION()
+	void OnRep_NumOfDeath();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
