@@ -44,6 +44,9 @@ public:
 	class UCameraComponent* Camera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UAudioComponent* ShotArrowSound;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class USceneCaptureComponent2D* MinimapCapture;
+
 
 	// TraceSetting in BP
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -117,16 +120,16 @@ public:
 	UFUNCTION()
 	void ChargeTimerFunc();
 	
-	// C2S Attack Function - Pre Function call to Server Multicast
-	// Plus, Attack Available Check Process
+	// C2S Attack Function (Spawn Arrow) - Pre Function call to Server Multicast
 	UFUNCTION(Server, Reliable)
-	void C2S_MainAttackFunc(const EBasicState& AttackState, int ChargeParam = 0);
-	void C2S_MainAttackFunc_Implementation(const EBasicState& AttackState, int ChargeParam = 0);
-	// S2A Attack Function
+	void C2S_MainAttackFunc(const EBasicState& AttackState, FVector TargetVector, int ChargeParam = 0);
+	void C2S_MainAttackFunc_Implementation(const EBasicState& AttackState, FVector TargetVector, int ChargeParam = 0);
+	// S2A Attack Animation, Sound, Effect
 	UFUNCTION(NetMulticast, Reliable)
-	void S2A_MainAttackFunc(const EBasicState& AttackState, FVector TargetVector);
-	void S2A_MainAttackFunc_Implementation(const EBasicState& AttackState, FVector TargetVector);
+	void S2A_SubAttackFunc(const EBasicState& AttackState, FVector TargetVector);
+	void S2A_SubAttackFunc_Implementation(const EBasicState& AttackState, FVector TargetVector);
 
+	// Attack Available Check
 	bool bIsAttackAvailable;
 
 	// Spawn Arrow

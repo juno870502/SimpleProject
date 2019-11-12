@@ -30,11 +30,11 @@ void UBasicMainWidget::SetMP(float NewMPPercent)
 	}
 }
 
-void UBasicMainWidget::SetPublicMSG(int Count)
+void UBasicMainWidget::SetPublicMSG(int Count, int MaxCount)
 {
 	if (GlobalText)
 	{
-		GlobalText->SetText(FText::FromString(FString::Printf(TEXT("%d Monster Killed"), Count)));
+		GlobalText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d Monster Killed"), Count, MaxCount)));
 	}
 }
 

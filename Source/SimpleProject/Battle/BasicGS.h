@@ -17,11 +17,18 @@ class SIMPLEPROJECT_API ABasicGS : public AGameStateBase
 public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = "OnRep_NumOfDeath")
 	int NumOfDeathMonsters = 0;
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	int NumOfMonsters;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = "OnRep_NumOfGoal")
+	int GoalOfKilledMonsters;
 
+	// This Function Call PublicMSG. and if Kill number over Goal number, set msg fixing
 	UFUNCTION()
 	void OnRep_NumOfDeath();
 
+	UFUNCTION()
+	void OnRep_NumofGoal();
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SetNumOfDeathMonsters(int Number);
+	int GetNumOfDeathMonsters();
 };

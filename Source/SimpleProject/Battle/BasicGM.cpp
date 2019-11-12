@@ -19,7 +19,7 @@ void ABasicGM::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &ABasicGM::SpawnFunction, 1.f, true);
+	GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &ABasicGM::SpawnFunction, 5.f, true);
 }
 
 void ABasicGM::WorldTravelFunc()
@@ -32,20 +32,22 @@ void ABasicGM::PostLogin(APlayerController * NewPlayer)
 	Super::PostLogin(NewPlayer);
 
 	PartyNumber++;
-	MaxMonsterNumber += PartyNumber * 10;
-	GetGameState<ABasicGS>();
+	MaxMonsterNumber += PartyNumber * MonsterPerPlayer;
+	GetGameState<ABasicGS>()->GoalOfKilledMonsters = MaxMonsterNumber;
 }
 
 void ABasicGM::SpawnFunction()
 {
 	//GetPlayer
 	//FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HomeLocation")), 500.f);
+	TArray<AActor*> FieldMonsters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABasicMonster::StaticClass(), FieldMonsters);
+	NumOfMonster = FieldMonsters.Num();
 	if (NumOfMonster < MaxMonsterNumber)
 	{
 		FVector SpanwLocation = UNavigationSystemV1::GetRandomReachablePointInRadius(GetWorld(), FVector(0), 2000.f);
 		FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
 		ABasicMonster* Mon = GetWorld()->SpawnActor<ABasicMonster>(MonsterClass, SpanwLocation, SpawnRotation);
-		NumOfMonster++;
 	}
 	
 	//ABasicAIController* AIC = GetWorld()->SpawnActor<ABasicAIController>(MonsterAIClass);

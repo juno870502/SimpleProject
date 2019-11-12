@@ -5,6 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -15,12 +16,14 @@
 #include "Perception/AISense_Sight.h"
 #include "Perception/AISense_Hearing.h"
 #include "Engine/World.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Animation/AnimMontage.h"
 #include "TimerManager.h"
 #include "Battle/Arrow/BasicArrow.h"
 #include "Battle/BasicMonster.h"
 #include "Battle/DamageType/BasicArrowDamageType.h"
 #include "Battle/BasicPlayerController.h"
+
 
 
 // Sets default values
@@ -51,11 +54,17 @@ ABasicCharacter::ABasicCharacter()
 	ShotArrowSound = CreateDefaultSubobject<UAudioComponent>(TEXT("ShotArrowSound"));
 	ShotArrowSound->bAutoActivate = false;
 
-	AttackMontage = CreateDefaultSubobject<UAnimMontage>(TEXT("AttackMontage"));
-	
-	SetCurrentState(EBasicState::LOCO);
+	// Scene Capture
+	MinimapCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("Minimap"));
+	MinimapCapture->SetupAttachment(RootComponent);
+	MinimapCapture->SetWorldLocationAndRotation(FVector(0.f, 0.f, 3000.f), FRotator(-90.f, 0.f, 0.f));
+	MinimapCapture->ProjectionType = ECameraProjectionMode::Orthographic;
+	MinimapCapture->OrthoWidth = 4096.f;
+
 
 	// Set Status
+	AttackMontage = CreateDefaultSubobject<UAnimMontage>(TEXT("AttackMontage"));
+	SetCurrentState(EBasicState::LOCO);
 	CurrentHP = MaxHP;
 	CurrentMP = 0.f;
 }
@@ -158,11 +167,10 @@ void ABasicCharacter::LeftRelease()
 {
 	if (ChargeFlag > 0)
 	{
-		C2S_MainAttackFunc(EBasicState::PrimaryShot, ChargeFlag);
-		UE_LOG(LogClass, Warning, TEXT("ChargeShot Call"));
+		InputFlag = 10;
+		GetWorldTimerManager().SetTimer(InputTimerHandle, this, &ABasicCharacter::InputTimerFunc, ResetATKTime, false, ResetATKTime);
 	}
 	GetWorldTimerManager().ClearTimer(ChargeTimerHandle);
-	ChargeFlag = 0;
 }
 
 void ABasicCharacter::RightClick()
@@ -181,47 +189,14 @@ void ABasicCharacter::RightClick()
 void ABasicCharacter::InputTimerFunc()
 {
 	GetWorldTimerManager().ClearTimer(InputTimerHandle);
-	switch (InputFlag)
+	if (bIsAttackAvailable == true)
 	{
-	case 1:
-		C2S_MainAttackFunc(EBasicState::PrimaryShot);
-		UE_LOG(LogClass, Warning, TEXT("PrimaryShot Call"));
-		break;
-	case 2:
-		C2S_MainAttackFunc(EBasicState::RAbilityShot);
-		UE_LOG(LogClass, Warning, TEXT("RAbilityShot Call"));
-		break;
-	case 3:
-		C2S_MainAttackFunc(EBasicState::QAbilityShot);
-		UE_LOG(LogClass, Warning, TEXT("QAbilityShot Call"));
-		break;
-	default:
-		UE_LOG(LogClass, Warning, TEXT("Error Shot Call"));
-		break;
-	}
-	InputFlag = 0;
-}
-
-void ABasicCharacter::ChargeTimerFunc()
-{
-	if (ChargeFlag < 2)
-	{
-		UE_LOG(LogClass, Warning, TEXT("Charge Func"));
-		ChargeFlag++;
-	}
-}
-
-void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & AttackState, int ChargeParam)
-{
-	if (bIsAttackAvailable)
-	{
-		ChargeFlag = ChargeParam;
-
 		ABasicPlayerController* PC = Cast<ABasicPlayerController>(GetController());
 		int SizeX;
 		int SizeY;
 		FVector CrosshairLocation;
 		FVector CrosshairDirection;
+		FVector NewTargetVector;
 
 		FHitResult Hit;
 		PC->GetViewportSize(SizeX, SizeY);
@@ -233,30 +208,88 @@ void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & Atta
 		ActorsToIgnore.Add(this);
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, TraceQuery, false, ActorsToIgnore, EDrawDebugTrace::None, Hit, true))
 		{
-			S2A_MainAttackFunc(AttackState, Hit.Location);
+			NewTargetVector = Hit.Location;
 		}
 		else
 		{
-			S2A_MainAttackFunc(AttackState, End);
+			NewTargetVector = End;
 		}
+
+		switch (InputFlag)
+		{
+		case 1:
+			C2S_MainAttackFunc(EBasicState::PrimaryShot, NewTargetVector);
+			UE_LOG(LogClass, Warning, TEXT("PrimaryShot Call"));
+			break;
+		case 2:
+			C2S_MainAttackFunc(EBasicState::RAbilityShot, NewTargetVector);
+			UE_LOG(LogClass, Warning, TEXT("RAbilityShot Call"));
+			break;
+		case 3:
+			C2S_MainAttackFunc(EBasicState::QAbilityShot, NewTargetVector);
+			UE_LOG(LogClass, Warning, TEXT("QAbilityShot Call"));
+			break;
+		case 10:
+			C2S_MainAttackFunc(EBasicState::PrimaryShot, NewTargetVector, ChargeFlag);
+			UE_LOG(LogClass, Warning, TEXT("PrimaryShot Call"));
+			break;
+		default:
+			UE_LOG(LogClass, Warning, TEXT("Error Shot Call"));
+			break;
+		}
+	}
+	InputFlag = 0;
+	ChargeFlag = 0;
+}
+
+void ABasicCharacter::ChargeTimerFunc()
+{
+	if (ChargeFlag < 2)
+	{
+		UE_LOG(LogClass, Warning, TEXT("Charge Func"));
+		ChargeFlag++;
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(ChargeTimerHandle);
 	}
 }
 
-void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& AttackState, FVector TargetVector)
+void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & AttackState, FVector TargetVector, int ChargeParam)
 {
-	
+	ChargeFlag = ChargeParam;
+	S2A_SubAttackFunc(AttackState, TargetVector);
+	switch (AttackState)
+	{
+	case EBasicState::PrimaryShot:
+		ShotArrow(TargetVector);
+		break;
+	case EBasicState::RAbilityShot:
+		if (CurrentMP >= RAbilityConsumption)
+		{
+			ShotArrow(TargetVector);
+		}
+		break;
+	case EBasicState::QAbilityShot:
+		if (CurrentMP >= QAbilityConsumption)
+		{
+			FVector Normal45 = UKismetMathLibrary::Normal(GetActorForwardVector() + GetActorUpVector()) * 50000.f;
+			ShotArrow(Normal45);
+		}
+		break;
+	}
+}
+
+void ABasicCharacter::S2A_SubAttackFunc_Implementation(const EBasicState& AttackState, FVector TargetVector)
+{
 	switch (AttackState)
 	{
 	case EBasicState::PrimaryShot:
 	{
-
-
 		// Set Shot Moment
 		SetCurrentState(EBasicState::PrimaryShot);
 		PlayAnimMontage(AttackMontage, 1.f, TEXT("PrimaryShot"));
 		ShotArrowSound->Play();
-
-		ShotArrow(TargetVector);
 		bIsAttackAvailable = false;
 	}
 		break;
@@ -270,7 +303,6 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 			SetCurrentState(EBasicState::RAbilityShot);
 			PlayAnimMontage(AttackMontage, .7f, TEXT("RAbilityShot"));
 			ShotArrowSound->Play();
-			ShotArrow(TargetVector);
 			bIsAttackAvailable = false;
 		}
 	}
@@ -283,10 +315,8 @@ void ABasicCharacter::S2A_MainAttackFunc_Implementation(const EBasicState& Attac
 			SetCurrentMP(CurrentMP - QAbilityConsumption);
 			// Set Shot Moment
 			SetCurrentState(EBasicState::QAbilityShot);
-			FVector Normal45 = UKismetMathLibrary::Normal(GetActorForwardVector() + GetActorUpVector()) * 50000.f;
 			PlayAnimMontage(AttackMontage, 1.f, TEXT("QAbilityShot"));
 			ShotArrowSound->Play();
-			ShotArrow(Normal45);
 			bIsAttackAvailable = false;
 		}
 	}

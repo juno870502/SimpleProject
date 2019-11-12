@@ -29,5 +29,5 @@ public:
 
 	void SetHP(float NewHPPercent);
 	void SetMP(float NewMPPercent);
-	void SetPublicMSG(int Count);
+	void SetPublicMSG(int Count, int MaxCount);
 };

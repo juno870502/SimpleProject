@@ -93,7 +93,7 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 		if (DamageEvent.DamageTypeClass != UBasicMonsterDamageType::StaticClass())
 		{
 			//DamageEvent.DamageTypeClass.
-			CurrentHP -= Damage * 50;
+			CurrentHP -= Damage;
 			UE_LOG(LogClass, Warning, TEXT("Monster Current HP : %f"), CurrentHP);
 			if (CurrentHP <= 0)
 			{
@@ -206,7 +206,7 @@ void ABasicMonster::DeathTimerFunc()
 	if (DissolveParam >= DissolveTimerLimit)
 	{
 		ABasicGS* GS = Cast<ABasicGS>(GetWorld()->GetGameState());
-		GS->NumOfDeathMonsters++;
+		GS->SetNumOfDeathMonsters(GS->GetNumOfDeathMonsters() + 1);
 		Destroy();
 	}
 }

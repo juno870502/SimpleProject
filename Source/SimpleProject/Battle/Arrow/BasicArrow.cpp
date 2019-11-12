@@ -110,7 +110,7 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 			BC->SetCurrentMP(BC->CurrentMP + 10);
 			// Apply Damage And Play Effect 
 			APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
-			UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
+			UGameplayStatics::ApplyPointDamage(OtherActor, BaseDamage * (ChargeFlag + 1), -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint);
 			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitArrowSound, SweepResult.ImpactPoint);
 			if (ChargeFlag > 0)

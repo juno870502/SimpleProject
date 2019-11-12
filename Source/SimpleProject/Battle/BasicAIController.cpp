@@ -151,7 +151,8 @@ void ABasicAIController::Respawn()
 {
 	// Set Random Respawn Location from Home Vecotr
 	FVector OriginVec = BBComponent->GetValueAsVector(TEXT("HomeLocation"));
-	FVector TargetVec = UNavigationSystemV1::GetRandomPointInNavigableRadius(GetWorld(), OriginVec, 3000.f);
+	FNavLocation TargetVec;
+	Cast<UNavigationSystemV1>(GetWorld()->GetNavigationSystem())->GetRandomPointInNavigableRadius(OriginVec, 3000.f, TargetVec);
 	GetPawn()->SetActorLocation(TargetVec);
 	
 	// Monster Initialize

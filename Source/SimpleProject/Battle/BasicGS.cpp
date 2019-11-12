@@ -13,7 +13,23 @@ void ABasicGS::OnRep_NumOfDeath()
 	ABasicPlayerController* PC = Cast<ABasicPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (PC && PC->MainWidget)
 	{
-		PC->MainWidget->SetPublicMSG(NumOfDeathMonsters);
+		if (NumOfDeathMonsters <= GoalOfKilledMonsters)
+		{
+			PC->MainWidget->SetPublicMSG(NumOfDeathMonsters, GoalOfKilledMonsters);
+		}
+		else
+		{
+			PC->MainWidget->SetPublicMSG(GoalOfKilledMonsters, GoalOfKilledMonsters);
+		}
+	}
+}
+
+void ABasicGS::OnRep_NumofGoal()
+{
+	ABasicPlayerController* PC = Cast<ABasicPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (PC && PC->MainWidget)
+	{
+		PC->MainWidget->SetPublicMSG(NumOfDeathMonsters, GoalOfKilledMonsters);
 	}
 }
 
@@ -22,4 +38,15 @@ void ABasicGS::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABasicGS, NumOfDeathMonsters);
+	DOREPLIFETIME(ABasicGS, GoalOfKilledMonsters);
+}
+
+void ABasicGS::SetNumOfDeathMonsters(int Number)
+{
+	NumOfDeathMonsters = Number;
+}
+
+int ABasicGS::GetNumOfDeathMonsters()
+{
+	return NumOfDeathMonsters;
 }

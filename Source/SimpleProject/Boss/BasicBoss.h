@@ -15,5 +15,7 @@ class SIMPLEPROJECT_API ABasicBoss : public ABasicMonster
 	GENERATED_BODY()
 	
 public:
+
+	ABasicBoss();
 	void FunctionOfAttack();
 };
