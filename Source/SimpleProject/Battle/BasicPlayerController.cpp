@@ -4,6 +4,8 @@
 #include "BasicPlayerController.h"
 #include "UserWidget.h"
 #include "Battle/UI/BasicMainWidget.h"
+#include "Battle/BasicCharacter.h"
+#include "GameFramework/SpectatorPawn.h"
 
 ABasicPlayerController::ABasicPlayerController()
 {
@@ -44,4 +46,18 @@ void ABasicPlayerController::SetStatusMP(float NewMPPercent)
 	{
 		MainWidget->SetMP(NewMPPercent);
 	}
+}
+
+void ABasicPlayerController::SetPCtoSpectator()
+{
+	//
+	//ABasicCharacter* BC = Cast<ABasicCharacter>(GetPawn());
+	//if (BC)
+	//{
+	//	
+	//}
+	//OnUnPossess();
+	//UnPossess();
+	//Possess(SpawnSpectatorPawn());
+
 }

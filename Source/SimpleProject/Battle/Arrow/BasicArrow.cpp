@@ -35,7 +35,6 @@ ABasicArrow::ABasicArrow()
 	// Set mesh collision
 	StaticMesh->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
 	StaticMesh->SetCollisionProfileName(TEXT("NoCollision"));
-	StaticMesh->SetGenerateOverlapEvents(false);
 
 	// Set projectile movement setting
 	Projectile->bRotationFollowsVelocity = true;

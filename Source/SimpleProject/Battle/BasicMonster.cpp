@@ -3,7 +3,10 @@
 
 #include "BasicMonster.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Components/BillboardComponent.h"
 #include "Battle/BasicAIController.h"
+#include "Battle/UI/MonsterBillboardWidget.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,15 +24,21 @@ ABasicMonster::ABasicMonster()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -88.f), FRotator(0.f, -90.f, 0.f));
+
+	HPBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBar"));
+	HPBar->SetupAttachment(RootComponent);
+	HPBar->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
+	HPBar->SetDrawSize(FVector2D(160.f, 40.f));
+	//HPBar->SetPivot(FVector2D(.5f, 2.f));
 
 	AIControllerClass = ABasicAIController::StaticClass();
 
-	//GetMesh()->SetCollisionProfileName(TEXT("MonsterProf"));
+	// Collision Setting
 	//GetMesh()->SetGenerateOverlapEvents(true);
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MonsterProf"));
-
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+	GetMesh()->SetCollisionProfileName(TEXT("MonsterProf"));
+	
 	// Monster Rotation Setup
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -56,6 +65,13 @@ void ABasicMonster::BeginPlay()
 void ABasicMonster::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	APlayerCameraManager* CM = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+
+	// Billboard Widget Rotate
+	if (CM)
+	{
+		HPBar->SetWorldRotation(FRotator(0.f, CM->GetCameraRotation().Yaw + 180, 0.f));
+	}
 }
 
 // Called to bind functionality to input
@@ -68,6 +84,8 @@ void ABasicMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+
 
 	switch (DamageEvent.GetTypeID())
 	{
@@ -87,6 +105,7 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 			{
 				S2A_SetCurrentState(EMonsterState::HIT);
 			}
+			S2A_UpdateWidget(CurrentHP / MaxHP, Damage);
 		}
 		break;
 	case FPointDamageEvent::ClassID:
@@ -104,11 +123,13 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 			{
 				S2A_SetCurrentState(EMonsterState::HIT);
 			}
+			S2A_UpdateWidget(CurrentHP / MaxHP, Damage);
 		}
 		const FPointDamageEvent* PDE = (FPointDamageEvent*)&DamageEvent;
 		LaunchCharacter(PDE->ShotDirection * 1000.f, true, true);
 		break;
 	}
+
 	return Damage;
 }
 
@@ -195,7 +216,8 @@ void ABasicMonster::SpawnTimerFunc()
 void ABasicMonster::S2A_DeathFunction_Implementation()
 {
 	GetMesh()->SetSimulatePhysics(true);
-	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
+	HPBar->SetVisibility(false);
 	GetWorldTimerManager().SetTimer(DissolveTimer, this, &ABasicMonster::DeathTimerFunc, 0.1f, true);
 }
 
@@ -206,8 +228,20 @@ void ABasicMonster::DeathTimerFunc()
 	if (DissolveParam >= DissolveTimerLimit)
 	{
 		ABasicGS* GS = Cast<ABasicGS>(GetWorld()->GetGameState());
-		GS->SetNumOfDeathMonsters(GS->GetNumOfDeathMonsters() + 1);
+		if (GS)
+		{
+			GS->SetNumOfDeathMonsters(GS->GetNumOfDeathMonsters() + 1);
+		}
 		Destroy();
+	}
+}
+
+void ABasicMonster::S2A_UpdateWidget_Implementation(const float& NewPercent, const float& NewDamage)
+{
+	UMonsterBillboardWidget* BW = Cast<UMonsterBillboardWidget>(HPBar->GetUserWidgetObject());
+	if (BW)
+	{
+		BW->ShowDamageAndHP(NewPercent, NewDamage);
 	}
 }
 

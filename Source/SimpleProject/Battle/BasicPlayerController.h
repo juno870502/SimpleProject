@@ -33,4 +33,6 @@ public:
 	void SetStatusHP(float NewHPPercent);
 
 	void SetStatusMP(float NewMPPercent);
+
+	void SetPCtoSpectator();
 };

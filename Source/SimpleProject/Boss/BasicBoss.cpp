@@ -11,6 +11,9 @@ ABasicBoss::ABasicBoss()
 {
 	GetCapsuleComponent()->SetCapsuleHalfHeight(200.f);
 	GetCapsuleComponent()->SetCapsuleRadius(100.f);
+	
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+	GetMesh()->SetCollisionProfileName(TEXT("MonsterProf"));
 
 	GetMesh()->SetRelativeLocation(FVector(1.0f, 1.0f, -200.f));
 }
@@ -18,4 +21,8 @@ ABasicBoss::ABasicBoss()
 void ABasicBoss::FunctionOfAttack()
 {
 	
+}
+
+void ABasicBoss::S2A_DeathFunction_Implementation()
+{
 }

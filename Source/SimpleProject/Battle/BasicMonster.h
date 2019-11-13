@@ -40,6 +40,10 @@ public:
 	// Take Damage (Need Sync)
 	virtual float TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser) override;
 
+	// Components
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	class UWidgetComponent* HPBar;
+
 	// Monster Status
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Status")
 	float MaxHP = 100.f;
@@ -80,8 +84,9 @@ public:
 
 	// Monster Death Function(Death effect)
 	UFUNCTION(NetMulticast, Reliable)
-	void S2A_DeathFunction();
-	void S2A_DeathFunction_Implementation();
+	virtual void S2A_DeathFunction();
+	virtual void S2A_DeathFunction_Implementation();
+
 	UFUNCTION()
 	void DeathTimerFunc();
 
@@ -89,6 +94,8 @@ public:
 	float DissolveParam = 1.f;
 	float DissolveTimerLimit = 3.f;
 
-	/*UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TSubclassOf	<class ABasicAIController> BaseAIC;*/
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_UpdateWidget(const float& NewPercent, const float& NewDamage);
+	void S2A_UpdateWidget_Implementation(const float& NewPercent, const float& NewDamage);
+
 };

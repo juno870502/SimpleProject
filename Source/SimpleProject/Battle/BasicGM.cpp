@@ -33,7 +33,9 @@ void ABasicGM::PostLogin(APlayerController * NewPlayer)
 
 	PartyNumber++;
 	MaxMonsterNumber += PartyNumber * MonsterPerPlayer;
-	GetGameState<ABasicGS>()->GoalOfKilledMonsters = MaxMonsterNumber;
+	ABasicGS* GS = GetGameState<ABasicGS>();
+	GS->GoalOfKilledMonsters = MaxMonsterNumber;
+	
 }
 
 void ABasicGM::SpawnFunction()
@@ -45,7 +47,8 @@ void ABasicGM::SpawnFunction()
 	NumOfMonster = FieldMonsters.Num();
 	if (NumOfMonster < MaxMonsterNumber)
 	{
-		FVector SpanwLocation = UNavigationSystemV1::GetRandomReachablePointInRadius(GetWorld(), FVector(0), 2000.f);
+		FNavLocation SpanwLocation;
+		Cast<UNavigationSystemV1>(GetWorld()->GetNavigationSystem())->GetRandomReachablePointInRadius(FVector(0), 2000.f, SpanwLocation);
 		FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
 		ABasicMonster* Mon = GetWorld()->SpawnActor<ABasicMonster>(MonsterClass, SpanwLocation, SpawnRotation);
 	}

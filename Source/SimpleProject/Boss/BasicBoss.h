@@ -6,6 +6,15 @@
 #include "Battle/BasicMonster.h"
 #include "BasicBoss.generated.h"
 
+UENUM()
+enum class EBossAttack : uint8
+{
+	AttackSpecial1	UMETA(DisplayName = "AS1"),
+	AreaAttack		UMETA(DisplayName = "AreaAttack"),
+	GroundAttack	UMETA(DisplayName = "GroundAttack"),
+	Fire1			UMETA(DisplayName = "Fire1"),
+	Fire2			UMETA(DisplayName = "Fire2")
+};
 /**
  * 
  */
@@ -18,4 +27,9 @@ public:
 
 	ABasicBoss();
 	void FunctionOfAttack();
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	INT8 Phase = 1;
+	//virtual void S2A_DeathFunction() override;
+	virtual void S2A_DeathFunction_Implementation() override;
 };

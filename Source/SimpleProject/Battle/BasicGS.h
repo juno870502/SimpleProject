@@ -19,7 +19,8 @@ public:
 	int NumOfDeathMonsters = 0;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = "OnRep_NumOfGoal")
 	int GoalOfKilledMonsters;
-
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	TArray<class ABasicCharacter*> PartyPlayers;
 	// This Function Call PublicMSG. and if Kill number over Goal number, set msg fixing
 	UFUNCTION()
 	void OnRep_NumOfDeath();

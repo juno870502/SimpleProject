@@ -80,8 +80,8 @@ void ABasicMonProjectile::OnOverlapBegin(UPrimitiveComponent * OverlappedCompone
 		{
 			ABasicAIController* BAIC = Cast<ABasicAIController>(Mon->GetController());
 			//UE_LOG(LogClass, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
-			UGameplayStatics::ApplyPointDamage(OtherActor, 1.f, -SweepResult.Normal, SweepResult, BAIC, Mon, UBasicMonsterDamageType::StaticClass());
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint); 
+			UGameplayStatics::ApplyPointDamage(OtherActor, 5.f, -SweepResult.Normal, SweepResult, BAIC, Mon, UBasicMonsterDamageType::StaticClass());
 			Destroy();
 		}
 	}

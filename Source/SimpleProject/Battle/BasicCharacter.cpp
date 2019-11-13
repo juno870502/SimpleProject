@@ -339,8 +339,8 @@ void ABasicCharacter::ShotArrow(const FVector & TargetLocation)
 		{
 		case EBasicState::PrimaryShot:
 			Arrow = GetWorld()->SpawnActor<ABasicArrow>(PrimaryArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
-			UE_LOG(LogClass, Warning, TEXT("Charge Flag : %d"), ChargeFlag);
 			Arrow->S2A_ChargeFunction(ChargeFlag);
+			UE_LOG(LogClass, Warning, TEXT("Charge Flag : %d"), ChargeFlag);
 			break;
 		case EBasicState::RAbilityShot:
 			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, -30.f, 0.f), Param);
@@ -351,7 +351,6 @@ void ABasicCharacter::ShotArrow(const FVector & TargetLocation)
 			break;
 		case EBasicState::QAbilityShot:
 			GetWorld()->SpawnActor<ABasicArrow>(QAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
-
 			break;
 
 		}
@@ -368,6 +367,8 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
 	ABasicCharacter* BC = Cast<ABasicCharacter>(DamageCauser);
+	ABasicPlayerController* BPC = Cast<ABasicPlayerController>(GetController());
+
 	switch (DamageEvent.GetTypeID())
 	{
 	case FDamageEvent::ClassID:
@@ -379,7 +380,7 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 		if (!BC)
 		{
 			CurrentHP -= Damage;
-			ABasicPlayerController* BPC = Cast<ABasicPlayerController>(GetController());
+			
 			if (BPC)
 			{
 				BPC->SetStatusHP(CurrentHP / MaxHP);
@@ -393,6 +394,11 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 		LaunchCharacter(PDE->ShotDirection * 100.f, true, false);
 		break;
 	}
+	//if (CurrentHP <= 0)
+	//{
+	//	BPC->SetPCtoSpectator();
+	//	UnPossessed();
+	//}
 	return 0.0f;
 }
 
