@@ -9,7 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Battle/DamageType/BasicArrowDamageType.h"
 #include "Battle/BasicCharacter.h"
+#include "Battle/BasicPlayerController.h"
 #include "Sound/SoundBase.h"
+#include "Perception/AISense_Damage.h"
 
 // Sets default values
 ABasicArrow::ABasicArrow()
@@ -105,11 +107,14 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 		if (OtherActor != Pawn)
 		{
 			// Get Mana Point
+			float ActualDamage = BaseDamage * (ChargeFlag + 1);
 			ABasicCharacter* BC = Cast<ABasicCharacter>(GetOwner());
 			BC->SetCurrentMP(BC->CurrentMP + 10);
 			// Apply Damage And Play Effect 
-			APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
-			UGameplayStatics::ApplyPointDamage(OtherActor, BaseDamage * (ChargeFlag + 1), -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
+			ABasicPlayerController* PC = Cast<ABasicPlayerController>(BC->GetController());
+			UGameplayStatics::ApplyPointDamage(OtherActor, ActualDamage, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
+			UAISense_Damage::ReportDamageEvent(GetWorld(), OtherActor, BC, ActualDamage, GetActorLocation(), GetActorLocation());
+			UE_LOG(LogClass, Warning, TEXT("%s"), *BC->GetActorLocation().ToString())
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint);
 			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitArrowSound, SweepResult.ImpactPoint);
 			if (ChargeFlag > 0)

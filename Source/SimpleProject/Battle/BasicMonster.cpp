@@ -171,18 +171,23 @@ void ABasicMonster::S2A_SetCurrentState_Implementation(const EMonsterState & New
 	}
 }
 
-
 void ABasicMonster::S2A_MomentOfAttack_Implementation()
 {
 	FString Str = FString::Printf(TEXT("Fire_%d"), rand()%2);
 
 	PlayAnimMontage(AttackMontage, 1.f, *Str);
+	S_SpawnProjectile();
+}
+
+void ABasicMonster::S_SpawnProjectile_Implementation()
+{
 	TArray<AActor*> Ignore;
 	Ignore.Add(this);
 	FHitResult Hit;
 	FActorSpawnParameters Param;
 	Param.Owner = this;
-	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(), GetActorForwardVector()*5000.f, ETraceTypeQuery::TraceTypeQuery4, false, Ignore, EDrawDebugTrace::None, Hit, true))
+	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(), GetActorForwardVector()*5000.f, ETraceTypeQuery::TraceTypeQuery4, false, Ignore, EDrawDebugTrace::ForDuration, Hit, true))
 	{
 		//UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 1.0f, GetActorLocation(), Hit, GetController(), this, UBasicArrowDamageType::StaticClass());
 		GetWorld()->SpawnActor<ABasicMonProjectile>(Projectile, GetActorLocation(), GetActorRotation(), Param);

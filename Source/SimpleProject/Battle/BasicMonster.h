@@ -67,6 +67,10 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void S2A_MomentOfAttack();
 	virtual void S2A_MomentOfAttack_Implementation();
+	// Spawn Projectile Only Server
+	UFUNCTION(Server, Reliable)
+	virtual void S_SpawnProjectile();
+	virtual void S_SpawnProjectile_Implementation();
 
 	// Initialize Values (HP, AttackRange, State etc...)
 	void InitializeValues();

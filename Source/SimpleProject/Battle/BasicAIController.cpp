@@ -114,6 +114,7 @@ void ABasicAIController::SenseStuff(const TArray<AActor*>& UpdatedActors)
 	TArray<AActor*> PerceivedActors;
 	AIPerception->GetCurrentlyPerceivedActors(NULL, PerceivedActors);
 
+	// Select Closest Actor
 	float MinDistance = 9999.f;
 	ClosestTargetActor = nullptr;
 	for (auto i : PerceivedActors)

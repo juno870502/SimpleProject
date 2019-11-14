@@ -51,6 +51,9 @@ ABasicMonProjectile::ABasicMonProjectile()
 
 	// Hit Explosion Particle
 	HitEffect = CreateDefaultSubobject<UParticleSystem>(TEXT("HitEffect"));
+
+	// Replicate On
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned

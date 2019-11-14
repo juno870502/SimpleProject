@@ -7,13 +7,15 @@
 #include "BasicBoss.generated.h"
 
 UENUM()
-enum class EBossAttack : uint8
+enum class EBossState : uint8
 {
-	AttackSpecial1	UMETA(DisplayName = "AS1"),
+	Intro			UMETA(DisplayName = "Intro"),
+	TarnadoAttack	UMETA(DisplayName = "TornadoAttack"),
 	AreaAttack		UMETA(DisplayName = "AreaAttack"),
 	GroundAttack	UMETA(DisplayName = "GroundAttack"),
 	Fire1			UMETA(DisplayName = "Fire1"),
-	Fire2			UMETA(DisplayName = "Fire2")
+	Fire2			UMETA(DisplayName = "Fire2"),
+	Death			UMETA(DisplayName = "Death")
 };
 /**
  * 
@@ -29,7 +31,30 @@ public:
 	void FunctionOfAttack();
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int32 Phase = 1;
+	EBossState BossState;
 	//virtual void S2A_DeathFunction() override;
 	virtual void S2A_DeathFunction_Implementation() override;
+
+	// All Players
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	TArray<class AActor*> Players;
+	// Target Player
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	class AActor* Players;
+
+	// Spawn Emitters from Attack
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class UParticleSystem* TornadoAttack;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class UParticleSystem* AreaAttack;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class UParticleSystem* GroundAttack;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class UParticleSystem* FireAttack;
+
+	FTimerHandle TornadoTimer;
+	TArray<class UParticleSystemComponent*> Tornados;
+	UFUNCTION()
+	void TornadoTimerFunction();
+	int8 TornadoFlag = 0;
 };
