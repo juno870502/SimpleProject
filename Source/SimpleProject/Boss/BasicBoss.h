@@ -29,7 +29,7 @@ public:
 	void FunctionOfAttack();
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	INT8 Phase = 1;
+	int32 Phase = 1;
 	//virtual void S2A_DeathFunction() override;
 	virtual void S2A_DeathFunction_Implementation() override;
 };
