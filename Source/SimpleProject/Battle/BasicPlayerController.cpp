@@ -6,6 +6,7 @@
 #include "Battle/UI/BasicMainWidget.h"
 #include "Battle/BasicCharacter.h"
 #include "GameFramework/SpectatorPawn.h"
+#include "BasicSpectatorPawn.h"
 
 ABasicPlayerController::ABasicPlayerController()
 {
@@ -48,7 +49,7 @@ void ABasicPlayerController::SetStatusMP(float NewMPPercent)
 	}
 }
 
-void ABasicPlayerController::SetPCtoSpectator()
+void ABasicPlayerController::GameoverSetPCtoSpectator()
 {
 	//
 	//ABasicCharacter* BC = Cast<ABasicCharacter>(GetPawn());
@@ -59,5 +60,7 @@ void ABasicPlayerController::SetPCtoSpectator()
 	//OnUnPossess();
 	//UnPossess();
 	//Possess(SpawnSpectatorPawn());
-
+	SpectatorActor = GetWorld()->SpawnActor<ABasicSpectatorPawn>();
+	UnPossess();
+	Possess(SpectatorActor);
 }

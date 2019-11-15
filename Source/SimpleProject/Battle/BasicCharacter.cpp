@@ -372,8 +372,20 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	switch (DamageEvent.GetTypeID())
 	{
 	case FDamageEvent::ClassID:
+		CurrentHP -= Damage;
+		if (BPC)
+		{
+			BPC->SetStatusHP(CurrentHP / MaxHP);
+		}
+		UE_LOG(LogClass, Warning, TEXT("In Normal Damage"));
 		break;
 	case FRadialDamageEvent::ClassID:
+		CurrentHP -= Damage;
+		if (BPC)
+		{
+			BPC->SetStatusHP(CurrentHP / MaxHP);
+		}
+		UE_LOG(LogClass, Warning, TEXT("In Radial Damage"));
 		break;
 	case FPointDamageEvent::ClassID:
 		// if Monster Attack Hit...
@@ -394,12 +406,25 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 		LaunchCharacter(PDE->ShotDirection * 100.f, true, false);
 		break;
 	}
-	//if (CurrentHP <= 0)
-	//{
-	//	BPC->SetPCtoSpectator();
-	//	UnPossessed();
-	//}
+
+	// Dead Function
+	if (CurrentHP <= 0)
+	{
+		S2A_DeadFuntion();
+	}
+
 	return 0.0f;
+}
+
+void ABasicCharacter::S2A_DeadFuntion_Implementation()
+{
+	SetCurrentState(EBasicState::DEATH);
+	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+	ABasicPlayerController* BPC = Cast<ABasicPlayerController>(GetController());
+	if (BPC)
+	{
+		BPC->GameoverSetPCtoSpectator();
+	}
 }
 
 void ABasicCharacter::SetCurrentState(EBasicState NewState)

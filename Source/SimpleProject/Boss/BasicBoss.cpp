@@ -9,7 +9,9 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "TimerManager.h"
+#include "Battle/DamageType/BasicMonsterDamageType.h"
 
 ABasicBoss::ABasicBoss()
 {
@@ -26,29 +28,47 @@ ABasicBoss::ABasicBoss()
 	GroundAttack = CreateDefaultSubobject<UParticleSystem>(TEXT("Ground"));
 	FireAttack = CreateDefaultSubobject<UParticleSystem>(TEXT("Fire"));
 
+	AreaAttack->bAutoDeactivate = true;
+	GroundAttack->bAutoDeactivate = true;
+
 	BossState = EBossState::Intro;
 
 	MaxHP = 1000;
 	CurrentHP = MaxHP;
+
+	bReplicates = true;
 }
 
-void ABasicBoss::FunctionOfAttack()
+void ABasicBoss::FunctionOfAttack(EBossState& NewAttackState)
 {
+	
+}
+
+void ABasicBoss::S2A_FunctionOfAttack_Implementation(const EBossState & NewAttackState)
+{
+	BossState = NewAttackState;
 	switch (BossState)
 	{
 	case EBossState::TarnadoAttack:
 		for (auto i : Players)
 		{
-			FVector SpawnLocation = i->GetActorLocation() - 100.f;
-			Tornados.Add(UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TornadoAttack, GetActorLocation()));
-			GetWorldTimerManager().SetTimer(TornadoTimer, this, &ABasicBoss::TornadoTimerFunction, 0.1f, true);
+			FVector SpawnLocation = i->GetActorLocation() + FVector(0.f, 0.f, -500.f);
+			UParticleSystemComponent* TornadoParticle = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TornadoAttack, SpawnLocation);
+			Tornados.Add(TornadoParticle);
+			TornadoVectors.Add(SpawnLocation);
+
+			GetWorldTimerManager().SetTimer(TornadoTimer, this, &ABasicBoss::TornadoTimerFunction, TornadoRepeatTime, true);
+			UE_LOG(LogClass, Warning, TEXT("In FunctinofAttack"));
 		}
 		break;
 	case EBossState::AreaAttack:
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AreaAttack, GetActorLocation());
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AreaAttack, GetActorLocation(), GetActorRotation(), FVector(5.0f));
 		break;
 	case EBossState::GroundAttack:
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GroundAttack, GetActorLocation());
+		if (TargetPlayer)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GroundAttack, GetActorLocation() + FVector(0.f, 0.f, -200.f), FRotator(0.f, UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetPlayer->GetActorLocation()).Yaw, 0.f), FVector(2.f));
+		}
 		break;
 	case EBossState::Fire1:
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireAttack, GetActorLocation());
@@ -65,17 +85,43 @@ void ABasicBoss::S2A_DeathFunction_Implementation()
 
 void ABasicBoss::TornadoTimerFunction()
 {
-	if (TornadoFlag < 10)
+	if (TornadoFlag < 50)
 	{
 		TornadoFlag++;
 		for (auto i : Tornados)
 		{
-			i->AddRelativeLocation(FVector(0.f, 0.f, 10.f));
+			if (i)
+			{
+				i->AddRelativeLocation(FVector(0.f, 0.f, 10.f));
+			}
+		}
+		for (auto i : TornadoVectors)
+		{
+			//i->AddActorWorldTransform(FTransform(FRotator(0.f, 0.f, 0.f), FVector(0.f, 0.f, 10.f)));
+			TArray<AActor*> IgnoreActors;
+			IgnoreActors.Add(this);
+			UGameplayStatics::ApplyRadialDamage(GetWorld(), 1.f, i + FVector(0.f, 0.f,TornadoFlag * 10), 100.f, UBasicMonsterDamageType::StaticClass(), IgnoreActors);
+			
 		}
 	}
 	else
 	{
-		TornadoFlag = 0;
 		GetWorldTimerManager().ClearTimer(TornadoTimer);
+		TornadoFlag = 0;
+		for (auto i : Tornados)
+		{
+			if (i)
+			{
+				i->Deactivate();
+			}
+		}
+		
+		Tornados.Empty();
+		TornadoVectors.Empty();
+	}
+	if (TornadoFlag > 30)
+	{
+
+		
 	}
 }

@@ -27,6 +27,8 @@ public:
 	TSubclassOf<UUserWidget> MainWidgetClass;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	class UBasicMainWidget* MainWidget;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	class UBasicGameOverWidget* GameOverWidget;
 
 	virtual void BeginPlay() override;
 
@@ -34,5 +36,7 @@ public:
 
 	void SetStatusMP(float NewMPPercent);
 
-	void SetPCtoSpectator();
+	void GameoverSetPCtoSpectator();
+
+	class ABasicSpectatorPawn* SpectatorActor;
 };

@@ -28,7 +28,12 @@ class SIMPLEPROJECT_API ABasicBoss : public ABasicMonster
 public:
 
 	ABasicBoss();
-	void FunctionOfAttack();
+	void FunctionOfAttack(EBossState& NewAttackState);
+
+	//S2A Function
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_FunctionOfAttack(const EBossState& NewAttackState);
+	void S2A_FunctionOfAttack_Implementation(const EBossState& NewAttackState);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	EBossState BossState;
@@ -54,7 +59,9 @@ public:
 
 	FTimerHandle TornadoTimer;
 	TArray<class UParticleSystemComponent*> Tornados;
+	TArray<FVector> TornadoVectors;
 	UFUNCTION()
 	void TornadoTimerFunction();
+	float TornadoRepeatTime = 0.1f;
 	int8 TornadoFlag = 0;
 };

@@ -141,6 +141,11 @@ public:
 	// Take Damage
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	// If Player Dead, Excute this Function
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_DeadFuntion();
+	void S2A_DeadFuntion_Implementation();
+
 	// Change State
 	void SetCurrentState(EBasicState NewState);
 

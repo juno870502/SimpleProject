@@ -66,7 +66,7 @@ public:
 
 	// OnPerceptionUpdated Delegate
 	UFUNCTION()
-	void SenseStuff(const TArray<AActor*>& UpdatedActors);
+	virtual void SenseStuff(const TArray<AActor*>& UpdatedActors);
 
 	// Set Pawn State
 	void SetPawnState(EMonsterState NewState);
