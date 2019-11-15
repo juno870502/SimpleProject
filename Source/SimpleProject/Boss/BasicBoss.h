@@ -40,7 +40,7 @@ public:
 	TArray<class AActor*> Players;
 	// Target Player
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	class AActor* Players;
+	class AActor* TargetPlayer;
 
 	// Spawn Emitters from Attack
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
