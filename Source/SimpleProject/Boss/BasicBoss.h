@@ -48,20 +48,23 @@ public:
 	class AActor* TargetPlayer;
 
 	// Spawn Emitters from Attack
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	// This is Not Work... Depricated
+	/*UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	class UParticleSystem* TornadoAttack;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	class UParticleSystem* AreaAttack;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	class UParticleSystem* GroundAttack;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	class UParticleSystem* FireAttack;
+	class UParticleSystem* FireAttack;*/
 
-	FTimerHandle TornadoTimer;
-	TArray<class UParticleSystemComponent*> Tornados;
-	TArray<FVector> TornadoVectors;
-	UFUNCTION()
-	void TornadoTimerFunction();
-	float TornadoRepeatTime = 0.1f;
-	int8 TornadoFlag = 0;
+	// Spawn Attack Actor
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TSubclassOf<class ABasicBossAttack> TornadoAttack;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TSubclassOf<class ABasicBossAttack> AreaAttack;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TSubclassOf<class ABasicBossAttack> GroundAttack;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TSubclassOf<class ABasicBossAttack> FireAttack;
 };

@@ -9,7 +9,7 @@ EBTNodeResult::Type UBTT_SelectBossAttack::ExecuteTask(UBehaviorTreeComponent & 
 	ABasicBoss* Boss = Cast<ABasicBoss>(OwnerComp.GetAIOwner()->GetPawn());
 	if (Boss)
 	{
-		Boss->S2A_FunctionOfAttack(SelectedState);
+		Boss->FunctionOfAttack(SelectedState);
 		return EBTNodeResult::Succeeded;
 	}
 	return EBTNodeResult::Failed;

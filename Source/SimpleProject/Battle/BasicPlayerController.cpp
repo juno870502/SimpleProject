@@ -61,6 +61,9 @@ void ABasicPlayerController::GameoverSetPCtoSpectator()
 	//UnPossess();
 	//Possess(SpawnSpectatorPawn());
 	SpectatorActor = GetWorld()->SpawnActor<ABasicSpectatorPawn>();
-	UnPossess();
-	Possess(SpectatorActor);
+	if (HasAuthority())
+	{
+		UnPossess();
+		Possess(SpectatorActor);
+	}
 }
