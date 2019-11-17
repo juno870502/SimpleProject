@@ -35,7 +35,7 @@ ABasicMonster::ABasicMonster()
 	AIControllerClass = ABasicAIController::StaticClass();
 
 	// Collision Setting
-	//GetMesh()->SetGenerateOverlapEvents(true);
+	GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
 	GetMesh()->SetCollisionProfileName(TEXT("MonsterProf"));
 	

@@ -113,6 +113,22 @@ float ABasicBoss::TakeDamage(float Damage, FDamageEvent const & DamageEvent, ACo
 	switch (DamageEvent.GetTypeID())
 	{
 	case FDamageEvent::ClassID:
+		if (DamageEvent.DamageTypeClass == UBasicArrowRainDamageType::StaticClass())
+		{
+			// Boss is Too Big so take 1/5 damage
+			CurrentHP -= Damage / 5;
+			UE_LOG(LogClass, Warning, TEXT("Boss Current HP : %f"), CurrentHP);
+			if (CurrentHP <= 0)
+			{
+				S2A_SetCurrentState(EMonsterState::DEATH);
+				S2A_DeathFunction();
+			}
+			else
+			{
+				S2A_SetCurrentState(EMonsterState::HIT);
+			}
+			S2A_UpdateWidget(CurrentHP / MaxHP, Damage / 5);
+		}
 		break;
 	case FRadialDamageEvent::ClassID:
 		
