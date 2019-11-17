@@ -5,6 +5,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Battle/DamageType/BasicMonsterDamageType.h"
 
 // Sets default values
 ABasicBossAttack::ABasicBossAttack()
@@ -15,7 +16,7 @@ ABasicBossAttack::ABasicBossAttack()
 	Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
 	RootComponent = Particle;
 	Particle->bAutoActivate = false;
-
+	DamageType = UBasicMonsterDamageType::StaticClass();
 	bReplicates = true;
 }
 
@@ -26,6 +27,8 @@ void ABasicBossAttack::BeginPlay()
 	
 	Particle->Activate();
 	GetWorldTimerManager().SetTimer(AttackTimer, this, &ABasicBossAttack::AttackTimerFunction, AttackRate, true);
+	Ignores.Add(this);
+	Ignores.Add(GetOwner());
 }
 
 // Called every frame

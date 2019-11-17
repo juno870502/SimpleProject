@@ -6,6 +6,7 @@
 #include "Components/InputComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -23,6 +24,7 @@
 #include "Battle/BasicMonster.h"
 #include "Battle/DamageType/BasicArrowDamageType.h"
 #include "Battle/BasicPlayerController.h"
+#include "DamageType/BasicArrowRainDamageType.h"
 
 
 
@@ -268,6 +270,8 @@ void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & Atta
 		if (CurrentMP >= RAbilityConsumption)
 		{
 			ShotArrow(TargetVector);
+			// Mana Cost
+			SetCurrentMP(CurrentMP - RAbilityConsumption);
 		}
 		break;
 	case EBasicState::QAbilityShot:
@@ -275,6 +279,8 @@ void ABasicCharacter::C2S_MainAttackFunc_Implementation(const EBasicState & Atta
 		{
 			FVector Normal45 = UKismetMathLibrary::Normal(GetActorForwardVector() + GetActorUpVector()) * 50000.f;
 			ShotArrow(Normal45);
+			// Mana Cost
+			SetCurrentMP(CurrentMP - QAbilityConsumption);
 		}
 		break;
 	}
@@ -297,8 +303,6 @@ void ABasicCharacter::S2A_SubAttackFunc_Implementation(const EBasicState& Attack
 	{
 		if (CurrentMP >= RAbilityConsumption)
 		{
-			// Mana Cost
-			SetCurrentMP(CurrentMP - RAbilityConsumption);
 			// Set Shot Moment
 			SetCurrentState(EBasicState::RAbilityShot);
 			PlayAnimMontage(AttackMontage, .7f, TEXT("RAbilityShot"));
@@ -311,8 +315,6 @@ void ABasicCharacter::S2A_SubAttackFunc_Implementation(const EBasicState& Attack
 	{
 		if (CurrentMP >= QAbilityConsumption)
 		{
-			// Mana Cost
-			SetCurrentMP(CurrentMP - QAbilityConsumption);
 			// Set Shot Moment
 			SetCurrentState(EBasicState::QAbilityShot);
 			PlayAnimMontage(AttackMontage, 1.f, TEXT("QAbilityShot"));
@@ -339,8 +341,10 @@ void ABasicCharacter::ShotArrow(const FVector & TargetLocation)
 		{
 		case EBasicState::PrimaryShot:
 			Arrow = GetWorld()->SpawnActor<ABasicArrow>(PrimaryArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
-			Arrow->S2A_ChargeFunction(ChargeFlag);
-			UE_LOG(LogClass, Warning, TEXT("Charge Flag : %d"), ChargeFlag);
+			if (Arrow)
+			{
+				Arrow->S2A_ChargeFunction(ChargeFlag);
+			}
 			break;
 		case EBasicState::RAbilityShot:
 			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, -30.f, 0.f), Param);
@@ -350,7 +354,8 @@ void ABasicCharacter::ShotArrow(const FVector & TargetLocation)
 			GetWorld()->SpawnActor<ABasicArrow>(RAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator.Add(0.f, 15.f, 0.f), Param);
 			break;
 		case EBasicState::QAbilityShot:
-			GetWorld()->SpawnActor<ABasicArrow>(QAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
+			Arrow = GetWorld()->SpawnActor<ABasicArrow>(QAbilityArrow, GetMesh()->GetSocketLocation(TEXT("arrow_anchor")) + GetMesh()->GetSocketLocation(TEXT("arrow_anchor")).ForwardVector * 20.f, LookRotator, Param);
+			Arrow->CustomInitSpeed = 500.f;
 			break;
 
 		}
@@ -380,12 +385,14 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 		UE_LOG(LogClass, Warning, TEXT("In Normal Damage"));
 		break;
 	case FRadialDamageEvent::ClassID:
-		CurrentHP -= Damage;
-		if (BPC)
+		if (DamageEvent.DamageTypeClass != UBasicArrowRainDamageType::StaticClass())
 		{
-			BPC->SetStatusHP(CurrentHP / MaxHP);
+			CurrentHP -= Damage;
+			if (BPC)
+			{
+				BPC->SetStatusHP(CurrentHP / MaxHP);
+			}
 		}
-		UE_LOG(LogClass, Warning, TEXT("In Radial Damage"));
 		break;
 	case FPointDamageEvent::ClassID:
 		// if Monster Attack Hit...
@@ -419,7 +426,8 @@ float ABasicCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 void ABasicCharacter::S2A_DeadFuntion_Implementation()
 {
 	SetCurrentState(EBasicState::DEATH);
-	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+	GetMesh()->SetSimulatePhysics(true);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
 	ABasicPlayerController* BPC = Cast<ABasicPlayerController>(GetController());
 	if (BPC)
 	{

@@ -14,7 +14,10 @@ class SIMPLEPROJECT_API ABossAIController : public ABasicAIController
 {
 	GENERATED_BODY()
 public:
-	
+
+	virtual void BeginPlay() override;
 
 	virtual void SenseStuff(const TArray<AActor*>& UpdatedActors) override;
+
+	void SetPhase(int8 NewPhase);
 };

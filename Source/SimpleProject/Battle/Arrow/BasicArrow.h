@@ -46,6 +46,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void S2A_ChargeFunction(int ChargeValue);
 	void S2A_ChargeFunction_Implementation(int ChargeValue);
+
 	// Charge Shot Value
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	int ChargeFlag = 0;
@@ -54,6 +55,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float BaseDamage = 10.f;
 
+	// Gain Mana Point
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	float GainManaPoint = 10.f;
+
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void S2A_HitEffect(const FHitResult & SweepResult);
+	void S2A_HitEffect_Implementation(const FHitResult & SweepResult);
 };

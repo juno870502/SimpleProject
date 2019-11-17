@@ -106,17 +106,17 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 	{
 		if (OtherActor != Pawn)
 		{
-			// Get Mana Point
 			float ActualDamage = BaseDamage * (ChargeFlag + 1);
 			ABasicCharacter* BC = Cast<ABasicCharacter>(GetOwner());
-			BC->SetCurrentMP(BC->CurrentMP + 10);
 			// Apply Damage And Play Effect 
 			ABasicPlayerController* PC = Cast<ABasicPlayerController>(BC->GetController());
-			UGameplayStatics::ApplyPointDamage(OtherActor, ActualDamage, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
-			UAISense_Damage::ReportDamageEvent(GetWorld(), OtherActor, BC, ActualDamage, GetActorLocation(), GetActorLocation());
-			UE_LOG(LogClass, Warning, TEXT("%s"), *BC->GetActorLocation().ToString())
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint);
-			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitArrowSound, SweepResult.ImpactPoint);
+			if (HasAuthority())
+			{
+				UGameplayStatics::ApplyPointDamage(OtherActor, ActualDamage, -SweepResult.Normal, SweepResult, PC, Pawn, UBasicArrowDamageType::StaticClass());
+				UAISense_Damage::ReportDamageEvent(GetWorld(), OtherActor, BC, ActualDamage, GetActorLocation(), GetActorLocation());
+			}
+			S2A_HitEffect(SweepResult);
+
 			if (ChargeFlag > 0)
 			{
 				ChargeFlag--;
@@ -128,4 +128,14 @@ void ABasicArrow::OnOverlapBegin(UPrimitiveComponent * OverlappedComponent, AAct
 		}
 	}
 	//UGameplayStatics::ApplyPointDamage(OtherActor, 1.0f, SweepResult.ImpactPoint, SweepResult, );
+}
+
+void ABasicArrow::S2A_HitEffect_Implementation(const FHitResult & SweepResult)
+{
+	// Get Mana Point
+	ABasicCharacter* BC = Cast<ABasicCharacter>(GetOwner());
+	BC->SetCurrentMP(BC->CurrentMP + GainManaPoint);
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, SweepResult.ImpactPoint);
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitArrowSound, SweepResult.ImpactPoint);
 }

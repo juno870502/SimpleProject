@@ -7,10 +7,12 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Boss/Attack/BasicBossAttack.h"
+#include "Boss/BossAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "TimerManager.h"
 #include "Battle/DamageType/BasicMonsterDamageType.h"
+#include "Battle/DamageType/BasicArrowRainDamageType.h"
 
 ABasicBoss::ABasicBoss()
 {
@@ -34,9 +36,11 @@ void ABasicBoss::FunctionOfAttack(EBossState& NewAttackState)
 {
 	if (HasAuthority())
 	{
+		S2A_SetCurrentState(EMonsterState::ATTACK);
 		BossState = NewAttackState;
 		FActorSpawnParameters Param;
 		Param.Owner = this;
+		S2A_FunctionOfAttack(BossState);
 		switch (BossState)
 		{
 		case EBossState::TarnadoAttack:
@@ -48,7 +52,6 @@ void ABasicBoss::FunctionOfAttack(EBossState& NewAttackState)
 				//TornadoVectors.Add(SpawnLocation);
 				//GetWorldTimerManager().SetTimer(TornadoTimer, this, &ABasicBoss::TornadoTimerFunction, TornadoRepeatTime, true);
 				GetWorld()->SpawnActor<ABasicBossAttack>(TornadoAttack, i->GetActorLocation(), i->GetActorRotation(), Param);
-				UE_LOG(LogClass, Warning, TEXT("In TornadoAttack"));
 			}
 			break;
 		case EBossState::AreaAttack:
@@ -78,9 +81,84 @@ void ABasicBoss::FunctionOfAttack(EBossState& NewAttackState)
 
 void ABasicBoss::S2A_FunctionOfAttack_Implementation(const EBossState & NewAttackState)
 {
+	switch (NewAttackState)
+	{
 	
+	case EBossState::TarnadoAttack:
+		PlayAnimMontage(AttackMontage, 1.0f, TEXT("AS1"));
+		break;
+	case EBossState::AreaAttack:
+		PlayAnimMontage(AttackMontage, 1.0f, TEXT("AS2"));
+		break;
+	case EBossState::GroundAttack:
+		PlayAnimMontage(AttackMontage, 1.0f, TEXT("AS3"));
+		break;
+	case EBossState::Fire1:
+		PlayAnimMontage(AttackMontage, 1.0f, TEXT("Fire"));
+		break;
+	case EBossState::Fire2:
+		PlayAnimMontage(AttackMontage, 1.0f, TEXT("Fire"));
+		break;
+	}
 }
 
 void ABasicBoss::S2A_DeathFunction_Implementation()
 {
+}
+
+float ABasicBoss::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+	//Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	switch (DamageEvent.GetTypeID())
+	{
+	case FDamageEvent::ClassID:
+		break;
+	case FRadialDamageEvent::ClassID:
+		
+		if (DamageEvent.DamageTypeClass == UBasicArrowRainDamageType::StaticClass())
+		{
+			// Boss is Too Big so take 1/5 damage
+			CurrentHP -= Damage/5;
+			UE_LOG(LogClass, Warning, TEXT("Boss Current HP : %f"), CurrentHP);
+			if (CurrentHP <= 0)
+			{
+				S2A_SetCurrentState(EMonsterState::DEATH);
+				S2A_DeathFunction();
+			}
+			else
+			{
+				S2A_SetCurrentState(EMonsterState::HIT);
+			}
+			S2A_UpdateWidget(CurrentHP / MaxHP, Damage/5);
+		}
+		break;
+	case FPointDamageEvent::ClassID:
+		if (DamageEvent.DamageTypeClass != UBasicMonsterDamageType::StaticClass())
+		{
+			//DamageEvent.DamageTypeClass.
+			CurrentHP -= Damage;
+			UE_LOG(LogClass, Warning, TEXT("Boss Current HP : %f"), CurrentHP);
+			if (CurrentHP <= 0)
+			{
+				S2A_SetCurrentState(EMonsterState::DEATH);
+				S2A_DeathFunction();
+			}
+			else
+			{
+				S2A_SetCurrentState(EMonsterState::HIT);
+			}
+			S2A_UpdateWidget(CurrentHP / MaxHP, Damage);
+		}
+		const FPointDamageEvent* PDE = (FPointDamageEvent*)&DamageEvent;
+		LaunchCharacter(PDE->ShotDirection * 1000.f, true, true);
+		break;
+	}
+	if (CurrentHP < MaxHP/2)
+	{
+		ABossAIController* BAIC = Cast<ABossAIController>(GetController());
+		BAIC->SetPhase(1);
+	}
+
+	return Damage;
 }

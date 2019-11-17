@@ -67,4 +67,6 @@ public:
 	TSubclassOf<class ABasicBossAttack> GroundAttack;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	TSubclassOf<class ABasicBossAttack> FireAttack;
+
+	virtual float TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser) override;
 };

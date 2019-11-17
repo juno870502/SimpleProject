@@ -85,8 +85,6 @@ float ABasicMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, 
 {
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
-
-
 	switch (DamageEvent.GetTypeID())
 	{
 	case FDamageEvent::ClassID:

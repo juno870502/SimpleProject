@@ -22,8 +22,6 @@ void ABasicTornadoBossAttack::BeginPlay()
 void ABasicTornadoBossAttack::AttackTimerFunction()
 {
 	AddActorLocalOffset(FVector(0.f, 0.f, 10.f));
-	TArray<AActor*> Ignores;
-	Ignores.Add(this);
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), BaseDamage, GetActorLocation(), 100.f, DamageType, Ignores, GetOwner());
 	if (AttackTimerFlag >= 40)
 	{

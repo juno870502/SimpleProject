@@ -79,7 +79,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
 	float RAbilityConsumption = 20.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status")
-		float QAbilityConsumption = 50.f;
+	float QAbilityConsumption = 50.f;
 	// Change Charactre MP
 	void SetCurrentMP(float NewMP);
 

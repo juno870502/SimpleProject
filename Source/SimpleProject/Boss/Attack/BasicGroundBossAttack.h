@@ -18,4 +18,5 @@ public:
 	virtual void BeginPlay() override;
 	virtual void AttackTimerFunction() override;
 	
+	FVector EndPoint;
 };

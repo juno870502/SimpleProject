@@ -41,6 +41,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	int32 AttackTimerFlag = 0.f;
 
+	TArray<AActor*> Ignores;
+
 	// Need to override.
 	UFUNCTION()
 	virtual void AttackTimerFunction();
